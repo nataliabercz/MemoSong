@@ -1,7 +1,7 @@
 import os
-import datetime
 import pygame
 import tkinter
+import threading
 import customtkinter
 import CTkMessagebox
 from PIL import Image
@@ -11,7 +11,7 @@ from scrollable_radiobutton_frame import ScrollableRadiobuttonFrame
 
 class GenericFunctions:
     width = 1000
-    height = 535
+    height = 540
     title = 'MemoSong'
     key_map = {'q': 'c3', '2': 'c#3', 'w': 'd3', '3': 'd#3', 'e': 'e3', 'r': 'f3', '5': 'f#3', 't': 'g3', '6': 'g#3',
                'y': 'a3', '7': 'a#3', 'u': 'b3', 'i': 'c4', '9': 'c#4', 'o': 'd4', '0': 'd#4', 'p': 'e4', '[': 'f4',
@@ -24,17 +24,6 @@ class GenericFunctions:
 
     def _is_white_key(self, key: str) -> bool:
         return '#' not in self.key_map[key]
-
-    def _get_filename(self, filename: str, browser_type: str, prefix: Optional[str] = '') -> str:
-        if not self._directory_exists(browser_type):
-            self._create_directory(browser_type)
-        if filename == '':
-            filename = f'{prefix}{browser_type[0:-1]}_{datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")}'
-        return f'{filename}.{self._get_extension(browser_type)}'
-
-    @staticmethod
-    def _get_extension(browser_type: str) -> str:
-        return 'txt' if browser_type == 'notes' else 'wav'
 
     def _filename_exists(self, browser_type: str, filename: str) -> bool:
         return filename in os.listdir(f'{self.app_path}/{browser_type}')
@@ -61,16 +50,16 @@ class GenericFunctions:
         self._initialize_sound_mixer()
 
     def _create_button_from_image(self, frame: customtkinter.CTkFrame, button_name: str, image_size: Tuple[int, int],
-                                  command: Any, side: tkinter.constants, width: Optional[int] = None) -> None:
+                                  command: Any, side: tkinter.constants, obj: Any, width: Optional[int] = None) -> None:
         if not width:
             width = image_size[0]
         button = customtkinter.CTkButton(frame, text='', width=width, command=command,
                                          image=self._open_image(f'{button_name}_image', image_size))
         button.pack(side=side)
-        setattr(self, f'{button_name}_button', button)
+        setattr(obj, f'{button_name}_button', button)
 
     @staticmethod
-    def _get_curselection_from_radiobutton_list(radiobutton_list: ScrollableRadiobuttonFrame) -> str:
+    def _get_curselection_from_radiobutton_list(radiobutton_list: Any) -> str:
         try:
             return radiobutton_list.get_selected_item()
         except tkinter.TclError:
@@ -84,7 +73,52 @@ class GenericFunctions:
     @staticmethod
     def _display_message_box(title: str, message: str, options: bool, width: int = 600) -> CTkMessagebox.CTkMessagebox:
         data = {'title': title, 'message': message, 'width': width, 'height': 1, 'fade_in_duration': 1,
-                'icon_size': (30, 30), 'icon': 'warning'}
+                'icon_size': (30, 30), 'icon': 'warning', 'bg_color': ['gray90', 'gray13']}
         if options:
             data.update({'option_1': 'No', 'option_2': 'Yes'})
         return CTkMessagebox.CTkMessagebox(**data)
+
+    @staticmethod
+    def start_new_thread(target: Any) -> None:
+        threading.Thread(target=target).start()
+
+    @staticmethod
+    def highlight_button(button: customtkinter.CTkButton) -> None:
+        button.configure(fg_color=['#325882', '#14375e'])
+
+    def remove_button_highlight(self, button: customtkinter.CTkButton, key: str) -> None:
+        button.configure(fg_color='white') if self._is_white_key(key) else button.configure(fg_color='black')
+
+    def add_keyboard_text(self) -> None:
+        for key in self.key_map:
+            button = getattr(self, f'{key}_key')
+            if self._is_white_key(key):
+                text_color = 'black'
+            else:
+                text_color = 'white'
+            button.configure(text=key, text_color=text_color, anchor=tkinter.S)
+
+    def remove_keyboard_text(self) -> None:
+        for key in self.key_map:
+            button = getattr(self, f'{key}_key')
+            button.configure(text='')
+
+    def load_image_names(self) -> None:
+        for image in os.listdir(f'{self.images_path}'):
+            if '.png' in image:
+                self.set_image_name(image.rsplit('.', 1)[0])
+
+    def set_image_name(self, image_name) -> None:
+        setattr(self, f'{image_name}_image', f'{self.images_path}/{image_name}.png')
+
+    @staticmethod
+    def _create_control_button(frame: customtkinter.CTkFrame, text: str, command: Any, side: Optional[str] = None,
+                               **kwargs: Any) -> None:
+        customtkinter.CTkButton(frame, text=text, fg_color='#1f538d', border_color='gray13',
+                                border_width=1, command=command, **kwargs).pack(side=side, fill=tkinter.BOTH)
+
+    @staticmethod
+    def _create_label(frame: customtkinter.CTkFrame, text: str, image: Optional[customtkinter.CTkImage] = None,
+                      **kwargs: Optional[Any]) -> None:
+        data = {'text': text, 'image': image} if image else {'text': text}
+        customtkinter.CTkLabel(frame, **data).pack(**kwargs)
