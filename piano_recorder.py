@@ -21,15 +21,16 @@ class PianoRecorder(GenericFunctions):
             self.key_time = 1000 * (time.time() - self.current_time - self.paused_time)
             time.sleep(0.001)
             try:
-                self.sound = self.sound.overlay(getattr(self, f'{self.key}_wave'), position=self.key_time)
+                self.sound = self.sound.overlay(getattr(self, f'{self.key}_wave', None), position=self.key_time)
                 self.key = None
-            except (KeyError, AttributeError, pydub.exceptions.TooManyMissingFrames):
+            except (AttributeError, pydub.exceptions.TooManyMissingFrames):
                 pass
             self.sound += pydub.AudioSegment.silent(duration=self.key_time + 1000 * (1 - self.sound.duration_seconds))
         try:
             self._save_recording(self.sound)
         except FileNotFoundError:
             pass
+        return
 
     def _create_base_sounds(self) -> None:
         self.sound = pydub.AudioSegment.silent(duration=1000)

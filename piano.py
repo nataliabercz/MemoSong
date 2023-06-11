@@ -1,17 +1,13 @@
-from key_player import KeyPlayer
+import pygame
 from piano_recorder import PianoRecorder
+from recording_manager import RecordingManager
 from generic_functions import GenericFunctions
 
 
 class Piano(GenericFunctions):
-    key_player = KeyPlayer()
     piano_recorder = PianoRecorder()
+    recording_manager = RecordingManager()
 
     def play_key(self, key: str) -> None:
-        self.key_player.key = key
-        self.start_new_thread(self.key_player.play_key)
-        self.update_piano_recorder_key(key)
-
-    def update_piano_recorder_key(self, key: str) -> None:
-        if self.piano_recorder.recording:
-            self.piano_recorder.key = key
+        pygame.mixer.Sound.play(pygame.mixer.Sound(f'{self.keys_path}/{self.key_map[key]}.wav'))
+        self.recording_manager.update_piano_recorder_key(key)

@@ -2,17 +2,14 @@ import os
 import time
 import pygame
 from typing import Any
-from key_player import KeyPlayer
 from piano_recorder import PianoRecorder
 from voice_recorder import VoiceRecorder
 from file_manager import FileManager
 
 
 class RecordingManager(FileManager):
-    key_player = KeyPlayer()
     piano_recorder = PianoRecorder()
     voice_recorder = VoiceRecorder()
-    file_manager = FileManager()
 
     def play_recording(self) -> None:
         FileManager.current_browser_type = 'recordings'
@@ -43,7 +40,7 @@ class RecordingManager(FileManager):
         self.stop_recording('voice')
 
     def start_recording(self, recording_type: str) -> None:
-        recorder = getattr(self, f'{recording_type}_recorder')
+        recorder = self._get_recorder_name(recording_type)
         if not recorder.recording:
             recorder.paused = False
             self._highlight_used_function(f'pause_{recording_type}_recording', 'off')
@@ -56,7 +53,7 @@ class RecordingManager(FileManager):
                     self._setup_recorder(recorder, recording_type, title)
                     self._mute_playback()
                     os.remove(f'{self.app_path}/recordings/{title}')
-                    self.update_list('recordings') # it would be better to remove only 1 item from this list
+                    self.update_list('recordings')  # it would be better to remove only 1 item from this list
                 else:
                     self._highlight_used_function(f'start_{recording_type}_recording', 'off')
             else:
@@ -73,8 +70,12 @@ class RecordingManager(FileManager):
         recorder.current_time = time.time()
         self.start_new_thread(recorder.record)
 
+    def update_piano_recorder_key(self, key: str) -> None:
+        if self.piano_recorder.recording:
+            self.piano_recorder.key = key
+
     def pause_recording(self, recording_type: str) -> None:
-        recorder = getattr(self, f'{recording_type}_recorder')
+        recorder = self._get_recorder_name(recording_type)
         if recorder.paused:
             self._setup_pause(recorder, recording_type, 'off')
             return
@@ -85,8 +86,11 @@ class RecordingManager(FileManager):
         recorder.paused = True if option == 'on' else False
 
     def stop_recording(self, recording_type: str) -> None:
-        recorder = getattr(self, f'{recording_type}_recorder')
+        recorder = self._get_recorder_name(recording_type)
         if recorder.recording:
             self._highlight_used_function(f'start_{recording_type}_recording', 'off')
             recorder.recording = False
             self.recordings_radiobutton_list.add_item(getattr(self, f'{recording_type}_recording_title'))
+
+    def _get_recorder_name(self, recording_type: str) -> Any:
+        return getattr(self, f'{recording_type}_recorder')
