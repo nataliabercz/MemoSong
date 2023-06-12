@@ -82,26 +82,32 @@ class GenericFunctions:
     def start_new_thread(target: Any) -> None:
         threading.Thread(target=target).start()
 
-    @staticmethod
-    def highlight_button(button: customtkinter.CTkButton) -> None:
+    def highlight_button(self, key) -> None:
+        button = self._get_button_from_key(key)
         button.configure(fg_color=['#325882', '#14375e'])
 
-    def remove_button_highlight(self, button: customtkinter.CTkButton, key: str) -> None:
+    def remove_button_highlight(self, key: str) -> None:
+        button = self._get_button_from_key(key)
         button.configure(fg_color='white') if self._is_white_key(key) else button.configure(fg_color='black')
 
     def add_keyboard_text(self) -> None:
         for key in self.key_map:
-            button = getattr(self, f'{key}_key')
+            button = self._get_button_from_key(key)
             if self._is_white_key(key):
+                text = key + '\n' + self.key_map[key][0].upper()
                 text_color = 'black'
             else:
+                text = key
                 text_color = 'white'
-            button.configure(text=key, text_color=text_color, anchor=tkinter.S)
+            button.configure(text=text, text_color=text_color, anchor=tkinter.S)
 
     def remove_keyboard_text(self) -> None:
         for key in self.key_map:
-            button = getattr(self, f'{key}_key')
-            button.configure(text='')
+            button = self._get_button_from_key(key)
+            if self._is_white_key(key):
+                button.configure(text=self.key_map[key][0].upper(), anchor=tkinter.S)
+            else:
+                button.configure(text='')
 
     def load_image_names(self) -> None:
         for image in os.listdir(f'{self.images_path}'):
@@ -122,3 +128,6 @@ class GenericFunctions:
                       **kwargs: Optional[Any]) -> None:
         data = {'text': text, 'image': image} if image else {'text': text}
         customtkinter.CTkLabel(frame, **data).pack(**kwargs)
+
+    def _get_button_from_key(self, key: str) -> customtkinter.CTkButton:
+        return getattr(self, f'{key}_key')

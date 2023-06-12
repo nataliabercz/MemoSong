@@ -1,4 +1,3 @@
-import time
 import tkinter
 import customtkinter
 from typing import Dict, Any, Optional
@@ -125,12 +124,13 @@ class MemoSong(GenericFunctions):
     def play_pressed_key(self, event) -> None:
         key = event.char.lower()
         if key in self.key_map:
-            button = getattr(self, f'{key}_key')
-            self.highlight_button(button)
+            self.highlight_button(key)
             self.root.update_idletasks()
-            self.piano.play_key(key)
-            time.sleep(0.05)
-            self.remove_button_highlight(button, key)
+            self.play_key(key)
+
+    def play_key(self, key: str) -> None:
+        Piano.key = key
+        self.start_new_thread(self.piano.play_key)
 
     def configure_file_browser(self, browser_type: str, column_number: int) -> None:
         browser_frame = self._create_main_frame(column_number, 0, grid_data={'rowspan': 2})
@@ -190,10 +190,12 @@ class MemoSong(GenericFunctions):
 
     def _create_piano_button(self, frame: customtkinter.CTkFrame, key: str, pad_x: int, pad_y: int, span: int,
                              **kwargs: Any) -> None:
-        button = customtkinter.CTkButton(frame, command=lambda x=key: self.piano.play_key(x), text='', corner_radius=0,
+        button = customtkinter.CTkButton(frame, command=lambda x=key: self.play_key(x), text='', corner_radius=0,
                                          **kwargs)
         button.grid(column=0, row=2, columnspan=span, sticky=tkinter.NW, padx=pad_x, pady=pad_y)
-        setattr(self, f'{key}_key', button)
+        if self._is_white_key(key):
+            button.configure(text=self.key_map[key][0].upper(), text_color='black', anchor=tkinter.S)
+        setattr(GenericFunctions, f'{key}_key', button)
 
 
 if __name__ == '__main__':
