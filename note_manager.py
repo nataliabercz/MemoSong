@@ -1,10 +1,12 @@
 import tkinter
 from file_manager import FileManager
 
+# add some 'add note' field to clean notepad
+
 
 class NoteManager(FileManager):
     def open_note(self) -> None:
-        FileManager.current_browser_type = 'notes'
+        FileManager._current_browser_type = 'notes'
         # what if file suddenly doesn't exist
         try:
             if note := self._get_curselection_from_radiobutton_list(self.notes_radiobutton_list):

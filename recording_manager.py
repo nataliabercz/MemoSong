@@ -1,6 +1,7 @@
 import os
 import time
 import pygame
+import tkinter
 from typing import Any
 from piano_recorder import PianoRecorder
 from voice_recorder import VoiceRecorder
@@ -12,7 +13,7 @@ class RecordingManager(FileManager):
     voice_recorder = VoiceRecorder()
 
     def play_recording(self) -> None:
-        FileManager.current_browser_type = 'recordings'
+        FileManager._current_browser_type = 'recordings'
         try:
             if song := self._get_curselection_from_radiobutton_list(self.recordings_radiobutton_list):
                 self._remove_selection_from_radiobutton_list(self.notes_radiobutton_list)
@@ -22,24 +23,24 @@ class RecordingManager(FileManager):
             self._display_message_box('ERROR', f'Invalid file!', False, 300)
 
     def start_piano_recording(self) -> None:
-        self.start_recording('piano')
+        self._start_recording('piano')
 
     def start_voice_recording(self) -> None:
-        self.start_recording('voice')
+        self._start_recording('voice')
 
     def pause_piano_recording(self) -> None:
-        self.pause_recording('piano')
+        self._pause_recording('piano')
 
     def pause_voice_recording(self) -> None:
-        self.pause_recording('voice')
+        self._pause_recording('voice')
 
     def stop_piano_recording(self) -> None:
-        self.stop_recording('piano')
+        self._stop_recording('piano')
 
     def stop_voice_recording(self) -> None:
-        self.stop_recording('voice')
+        self._stop_recording('voice')
 
-    def start_recording(self, recording_type: str) -> None:
+    def _start_recording(self, recording_type: str) -> None:
         recorder = self._get_recorder_name(recording_type)
         if not recorder.recording:
             recorder.paused = False
@@ -50,8 +51,8 @@ class RecordingManager(FileManager):
                 # it should block application !!
                 msg = self._display_message_box('OVERWRITE FILE', f'The file\n{title} already exists. Overwrite?', True)
                 if msg.get() == 'Yes':
-                    self._setup_recorder(recorder, recording_type, title)
                     self._mute_playback()
+                    self._setup_recorder(recorder, recording_type, title)
                     os.remove(f'{self.app_path}/recordings/{title}')
                     self.update_list('recordings')  # it would be better to remove only 1 item from this list
                 else:
@@ -68,13 +69,13 @@ class RecordingManager(FileManager):
         recorder.recording = True
         recorder.recording_full_name = f'{self.app_path}/recordings/{title}'
         recorder.current_time = time.time()
-        self.start_new_thread(recorder.record)
+        self._start_new_thread(recorder.record)
 
     def update_piano_recorder_key(self, key: str) -> None:
         if self.piano_recorder.recording:
             self.piano_recorder.key = key
 
-    def pause_recording(self, recording_type: str) -> None:
+    def _pause_recording(self, recording_type: str) -> None:
         recorder = self._get_recorder_name(recording_type)
         if recorder.paused:
             self._setup_pause(recorder, recording_type, 'off')
@@ -85,12 +86,16 @@ class RecordingManager(FileManager):
         self._highlight_used_function(f'pause_{recording_type}_recording', option)
         recorder.paused = True if option == 'on' else False
 
-    def stop_recording(self, recording_type: str) -> None:
+    def _stop_recording(self, recording_type: str) -> None:
         recorder = self._get_recorder_name(recording_type)
         if recorder.recording:
+            recorder.paused = False
+            self._highlight_used_function(f'pause_{recording_type}_recording', 'off')
             self._highlight_used_function(f'start_{recording_type}_recording', 'off')
             recorder.recording = False
             self.recordings_radiobutton_list.add_item(getattr(self, f'{recording_type}_recording_title'))
+            title_field = getattr(self, f'{recording_type}_recording_title_field')
+            title_field.delete(0, tkinter.END)
 
     def _get_recorder_name(self, recording_type: str) -> Any:
         return getattr(self, f'{recording_type}_recorder')

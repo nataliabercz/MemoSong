@@ -10,9 +10,9 @@ from scrollable_radiobutton_frame import ScrollableRadiobuttonFrame
 
 
 class GenericFunctions:
-    width = 1000
-    height = 540
-    title = 'MemoSong'
+    _width = 1000
+    _height = 535
+    _title = 'MemoSong'
     key_map = {'q': 'c3', '2': 'c#3', 'w': 'd3', '3': 'd#3', 'e': 'e3', 'r': 'f3', '5': 'f#3', 't': 'g3', '6': 'g#3',
                'y': 'a3', '7': 'a#3', 'u': 'b3', 'i': 'c4', '9': 'c#4', 'o': 'd4', '0': 'd#4', 'p': 'e4', '[': 'f4',
                '=': 'f#4', ']': 'g4', 'a': 'g#4', 'z': 'a4', 's': 'a#4', 'x': 'b4', 'c': 'c5', 'f': 'c#5', 'v': 'd5',
@@ -21,6 +21,10 @@ class GenericFunctions:
     app_path = os.path.dirname(os.path.realpath(__file__))
     images_path = f'{app_path}/data/images'
     keys_path = f'{app_path}/data/keys'
+
+    def _set_theme(self) -> None:
+        customtkinter.set_appearance_mode('dark')
+        customtkinter.set_default_color_theme(f'{self.app_path}/data/theme.json')
 
     def _is_white_key(self, key: str) -> bool:
         return '#' not in self.key_map[key]
@@ -79,18 +83,18 @@ class GenericFunctions:
         return CTkMessagebox.CTkMessagebox(**data)
 
     @staticmethod
-    def start_new_thread(target: Any) -> None:
+    def _start_new_thread(target: Any) -> None:
         threading.Thread(target=target).start()
 
-    def highlight_button(self, key) -> None:
+    def _highlight_button(self, key) -> None:
         button = self._get_button_from_key(key)
         button.configure(fg_color=['#325882', '#14375e'])
 
-    def remove_button_highlight(self, key: str) -> None:
+    def _remove_button_highlight(self, key: str) -> None:
         button = self._get_button_from_key(key)
         button.configure(fg_color='white') if self._is_white_key(key) else button.configure(fg_color='black')
 
-    def add_keyboard_text(self) -> None:
+    def _add_keyboard_text(self) -> None:
         for key in self.key_map:
             button = self._get_button_from_key(key)
             if self._is_white_key(key):
@@ -101,7 +105,7 @@ class GenericFunctions:
                 text_color = 'white'
             button.configure(text=text, text_color=text_color, anchor=tkinter.S)
 
-    def remove_keyboard_text(self) -> None:
+    def _remove_keyboard_text(self) -> None:
         for key in self.key_map:
             button = self._get_button_from_key(key)
             if self._is_white_key(key):
@@ -109,12 +113,12 @@ class GenericFunctions:
             else:
                 button.configure(text='')
 
-    def load_image_names(self) -> None:
+    def _load_image_names(self) -> None:
         for image in os.listdir(f'{self.images_path}'):
             if '.png' in image:
-                self.set_image_name(image.rsplit('.', 1)[0])
+                self._set_image_name(image.rsplit('.', 1)[0])
 
-    def set_image_name(self, image_name) -> None:
+    def _set_image_name(self, image_name) -> None:
         setattr(self, f'{image_name}_image', f'{self.images_path}/{image_name}.png')
 
     @staticmethod
@@ -131,3 +135,7 @@ class GenericFunctions:
 
     def _get_button_from_key(self, key: str) -> customtkinter.CTkButton:
         return getattr(self, f'{key}_key')
+
+    def _add_key_names(self, button: customtkinter.CTkButton, key: str) -> None:
+        if self._is_white_key(key):
+            button.configure(text=self.key_map[key][0].upper(), text_color='black', anchor=tkinter.S)
