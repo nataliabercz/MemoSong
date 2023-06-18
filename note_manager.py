@@ -1,13 +1,10 @@
 import tkinter
 from file_manager import FileManager
 
-# add some 'add note' field to clean notepad
-
 
 class NoteManager(FileManager):
     def open_note(self) -> None:
         FileManager._current_browser_type = 'notes'
-        # what if file suddenly doesn't exist
         try:
             if note := self._get_curselection_from_radiobutton_list(self.notes_radiobutton_list):
                 self._remove_selection_from_radiobutton_list(self.recordings_radiobutton_list)
@@ -17,7 +14,7 @@ class NoteManager(FileManager):
                         self.notepad_text_area.insert(tkinter.END, line)
                     file.close()
                 self.notepad_title_field.insert(0, ''.join(note.split('.')[0:-1]))
-        except UnicodeDecodeError:
+        except (UnicodeDecodeError, FileNotFoundError, OSError):
             self._display_message_box('ERROR', f'Invalid file!', False, 300)
 
     def save_note(self) -> None:
@@ -32,7 +29,11 @@ class NoteManager(FileManager):
             else:
                 return
         else:
-            self._save_note(filename)
+            try:
+                self._save_note(filename)
+            except OSError:
+                FileManager._display_message_box('ERROR', f'Invalid name!', False, 300)
+                return
         if filename != self.notes_radiobutton_list.get_selected_item() and not is_overwritten:
             self.notes_radiobutton_list.add_item(filename)
 

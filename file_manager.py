@@ -60,21 +60,23 @@ class FileManager(GenericFunctions):
             self._display_message_box('ERROR', str(e).split('] ')[1].split(':')[0], False, 300)
 
     def _delete_file(self, file_to_delete: str) -> None:
+        msg = self._display_message_box('DELETE FILE', f'Do you want to delete\n{file_to_delete}?', True)
+        if msg.get() == 'Yes':
+            if self._current_browser_type == 'recordings':
+                self._mute_playback()
+            self._remove_file(file_to_delete)
+            self.update_list(self._current_browser_type)
+            if self._current_browser_type == 'notes':
+                self.notepad_text_area.delete('1.0', tkinter.END)
+                self.notepad_title_field.delete(0, tkinter.END)
+        else:
+            msg.destroy()
+
+    def _remove_file(self, file_to_delete: str) -> None:
         try:
-            msg = self._display_message_box('DELETE FILE', f'Do you want to delete\n{file_to_delete}?', True)
-            if msg.get() == 'Yes':
-                if self._current_browser_type == 'recordings':
-                    self._mute_playback()
-                os.remove(f'{self.app_path}/{self._current_browser_type}/{file_to_delete}')
-                self.update_list(self._current_browser_type)
-                if self._current_browser_type == 'notes':
-                    self.notepad_text_area.delete('1.0', tkinter.END)
-                    self.notepad_title_field.delete(0, tkinter.END)
-            else:
-                msg.destroy()
-        except Exception as e:
-            # is it necessary ?? when it occurs?
-            print(str(e))
+            os.remove(f'{self.app_path}/{self._current_browser_type}/{file_to_delete}')
+        except FileNotFoundError:
+            pass
 
     def _get_filename(self, filename: str, browser_type: str, prefix: Optional[str] = '') -> str:
         if not self._directory_exists(browser_type):

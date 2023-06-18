@@ -19,7 +19,7 @@ class RecordingManager(FileManager):
                 self._remove_selection_from_radiobutton_list(self.notes_radiobutton_list)
                 pygame.mixer.music.load(f'{self.app_path}/recordings/{song}')
                 pygame.mixer.music.play()
-        except pygame.error:
+        except (pygame.error, FileNotFoundError, OSError):
             self._display_message_box('ERROR', f'Invalid file!', False, 300)
 
     def start_piano_recording(self) -> None:
@@ -48,12 +48,11 @@ class RecordingManager(FileManager):
             self._highlight_used_function(f'start_{recording_type}_recording', 'on')
             title = self._get_recording_title(recording_type)
             if title in os.listdir(f'{self.app_path}/recordings'):
-                # it should block application !!
                 msg = self._display_message_box('OVERWRITE FILE', f'The file\n{title} already exists. Overwrite?', True)
                 if msg.get() == 'Yes':
                     self._mute_playback()
                     self._setup_recorder(recorder, recording_type, title)
-                    os.remove(f'{self.app_path}/recordings/{title}')
+                    self._remove_file(title)
                     self.update_list('recordings')  # it would be better to remove only 1 item from this list
                 else:
                     self._highlight_used_function(f'start_{recording_type}_recording', 'off')
