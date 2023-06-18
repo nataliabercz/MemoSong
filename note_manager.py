@@ -11,8 +11,7 @@ class NoteManager(FileManager):
         try:
             if note := self._get_curselection_from_radiobutton_list(self.notes_radiobutton_list):
                 self._remove_selection_from_radiobutton_list(self.recordings_radiobutton_list)
-                self.notepad_title_field.delete(0, tkinter.END)
-                self.notepad_text_area.delete('1.0', tkinter.END)
+                self.clear_notepad()
                 with open(f'{self.app_path}/notes/{note}') as file:
                     for line in file:
                         self.notepad_text_area.insert(tkinter.END, line)
@@ -41,3 +40,7 @@ class NoteManager(FileManager):
         with open(f'{self.app_path}/notes/{filename}', 'w') as file:
             file.write(self.notepad_text_area.get(1.0, tkinter.END))
             file.close()
+
+    def clear_notepad(self) -> None:
+        self.notepad_title_field.delete(0, tkinter.END)
+        self.notepad_text_area.delete('1.0', tkinter.END)

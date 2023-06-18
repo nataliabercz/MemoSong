@@ -141,6 +141,10 @@ class MemoSong(GenericFunctions):
             command = self.recording_manager.play_recording
         self._create_radiobutton_list(browser_frame, browser_type, command)
 
+    def _create_radiobutton_list(self, browser_frame: customtkinter.CTkFrame, browser_type: str, command: Any) -> None:
+        radiobutton_list = self.file_manager.create_radiobutton_list(browser_frame, browser_type, command)
+        setattr(FileManager, f'{browser_type}_radiobutton_list', radiobutton_list)
+
     def configure_notepad(self) -> None:
         notepad_frame = self._create_main_frame(3, 0, frame_data={'height': self._height-200}, grid_data={'rowspan': 2})
         self._create_label(notepad_frame, 'NOTEPAD', side=tkinter.TOP)
@@ -148,7 +152,15 @@ class MemoSong(GenericFunctions):
         header_frame.pack(side=tkinter.TOP, fill=tkinter.BOTH)
         self._create_control_button(header_frame, 'Save', self.note_manager.save_note, tkinter.LEFT, width=1)
         self._create_label(header_frame, 'Title: ', side=tkinter.LEFT)
+        self._create_control_button(notepad_frame, 'Clear Notepad', self.note_manager.clear_notepad, tkinter.BOTTOM)
         self._setup_notepad(header_frame, notepad_frame)
+
+    @staticmethod
+    def _setup_notepad(header_frame: customtkinter.CTkFrame, notepad_frame: customtkinter.CTkFrame) -> None:
+        FileManager.notepad_title_field = customtkinter.CTkEntry(header_frame, width=150)
+        FileManager.notepad_title_field.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=1)
+        FileManager.notepad_text_area = customtkinter.CTkTextbox(notepad_frame)
+        FileManager.notepad_text_area.pack(side=tkinter.BOTTOM, fill=tkinter.BOTH, expand=1)
 
     def configure_piano(self) -> None:
         piano_frame = self._create_main_frame(0, 2, grid_data={'columnspan': 5})
@@ -166,17 +178,6 @@ class MemoSong(GenericFunctions):
             if not self._is_white_key(key):
                 self._create_piano_button(piano_frame, key, pad_x_black, 4, 26, fg_color='black', width=22, height=140)
                 pad_x_black += key_swift
-
-    def _create_radiobutton_list(self, browser_frame: customtkinter.CTkFrame, browser_type: str, command: Any) -> None:
-        radiobutton_list = self.file_manager.create_radiobutton_list(browser_frame, browser_type, command)
-        setattr(FileManager, f'{browser_type}_radiobutton_list', radiobutton_list)
-
-    @staticmethod
-    def _setup_notepad(header_frame: customtkinter.CTkFrame, notepad_frame: customtkinter.CTkFrame) -> None:
-        FileManager.notepad_title_field = customtkinter.CTkEntry(header_frame, width=150)
-        FileManager.notepad_title_field.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=1)
-        FileManager.notepad_text_area = customtkinter.CTkTextbox(notepad_frame)
-        FileManager.notepad_text_area.pack(side=tkinter.BOTTOM, fill=tkinter.BOTH, expand=1)
 
     def _create_main_frame(self, column: int, row: int, sticky: Optional[str] = tkinter.NSEW,
                            frame_data: Optional[Dict[str, Any]] = None,
