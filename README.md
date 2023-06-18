@@ -1,5 +1,13 @@
 # MemoSong
 
+Description:
+
+MemoSong was designed for artists who like to create songs.
+This application allows you to compose music and write lyrics in only one place.
+The melody can be hummed using the voice recorder or played directly on the piano.
+It is possible to use keyboard for that. 
+The included file browsers make it easy to review the created music pieces.
+
 ![img.png](app_description/1.png)
 
 ![img_6.png](app_description/2.png)
