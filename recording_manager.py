@@ -2,6 +2,7 @@ import os
 import time
 import pygame
 import tkinter
+import customtkinter
 from typing import Any
 from piano_recorder import PianoRecorder
 from voice_recorder import VoiceRecorder
@@ -41,7 +42,7 @@ class RecordingManager(FileManager):
         self._stop_recording('voice')
 
     def _start_recording(self, recording_type: str) -> None:
-        recorder = self._get_recorder_name(recording_type)
+        recorder = self._get_recorder(recording_type)
         if not recorder.recording:
             recorder.paused = False
             self._highlight_used_function(f'pause_{recording_type}_recording', 'off')
@@ -60,11 +61,11 @@ class RecordingManager(FileManager):
                 self._setup_recorder(recorder, recording_type, title)
 
     def _get_recording_title(self, recording_type: str) -> str:
-        title_field = getattr(self, f'{recording_type}_recording_title_field')
-        return self._get_filename(title_field.get(), 'recordings', f'{recording_type}_')
+        return self._get_filename(self._get_title_field(recording_type).get(), 'recordings', f'{recording_type}_')
 
     def _setup_recorder(self, recorder: Any, recording_type: str, title: str) -> None:
         setattr(self, f'{recording_type}_recording_title', title)
+        self._get_title_field(recording_type).configure(state='disabled')
         recorder.recording = True
         recorder.recording_full_name = f'{self.app_path}/recordings/{title}'
         recorder.current_time = time.time()
@@ -75,7 +76,7 @@ class RecordingManager(FileManager):
             self.piano_recorder.key = key
 
     def _pause_recording(self, recording_type: str) -> None:
-        recorder = self._get_recorder_name(recording_type)
+        recorder = self._get_recorder(recording_type)
         if recorder.paused:
             self._setup_pause(recorder, recording_type, 'off')
             return
@@ -86,15 +87,19 @@ class RecordingManager(FileManager):
         recorder.paused = True if option == 'on' else False
 
     def _stop_recording(self, recording_type: str) -> None:
-        recorder = self._get_recorder_name(recording_type)
+        recorder = self._get_recorder(recording_type)
         if recorder.recording:
             recorder.paused = False
             self._highlight_used_function(f'pause_{recording_type}_recording', 'off')
             self._highlight_used_function(f'start_{recording_type}_recording', 'off')
             recorder.recording = False
+            self._get_title_field(recording_type).configure(state='normal')
             self.recordings_radiobutton_list.add_item(getattr(self, f'{recording_type}_recording_title'))
             title_field = getattr(self, f'{recording_type}_recording_title_field')
             title_field.delete(0, tkinter.END)
 
-    def _get_recorder_name(self, recording_type: str) -> Any:
+    def _get_recorder(self, recording_type: str) -> Any:
         return getattr(self, f'{recording_type}_recorder')
+
+    def _get_title_field(self, recording_type: str) -> customtkinter.CTkEntry:
+        return getattr(self, f'{recording_type}_recording_title_field')
