@@ -111,7 +111,7 @@ class MemoSong(GenericFunctions):
             self.root.unbind('<Key>')
             self._remove_keyboard_text()
 
-    def _play_pressed_key(self, event: Any) -> None:
+    def _play_pressed_key(self, event: tkinter.Event) -> None:
         key = event.char.lower()
         if key in self.key_map:
             self._highlight_button(key)
