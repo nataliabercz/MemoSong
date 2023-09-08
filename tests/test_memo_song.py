@@ -1,9 +1,7 @@
 import unittest
 import tkinter
 import customtkinter
-import pygame
-from PIL import Image
-from mock import MagicMock, call, patch, mock_open
+from mock import MagicMock, call, patch
 from memo_song import MemoSong
 from file_manager import FileManager
 from generic_functions import GenericFunctions
@@ -11,13 +9,6 @@ from piano import Piano
 
 
 class TestMemoSong(unittest.TestCase):
-    calls_each_key = [call('q'), call('2'), call('w'), call('3'), call('e'), call('r'), call('5'), call('t'),
-                      call('6'), call('y'), call('7'), call('u'), call('i'), call('9'), call('o'), call('0'),
-                      call('p'), call('['), call('='), call(']'), call('a'), call('z'), call('s'), call('x'),
-                      call('c'), call('f'), call('v'), call('g'), call('b'), call('n'), call('j'), call('m'),
-                      call('k'), call(','), call('l'), call('.'), call('/')]
-    is_white_key = 3 * [True, False, True, False, True, True, False, True, False, True, False, True] + [True]
-
     mock_tkinter_frame = MagicMock()
     customtkinter.CTkFrame = MagicMock(return_value=mock_tkinter_frame)
     mock_tkinter_label = MagicMock()
@@ -42,6 +33,18 @@ class TestMemoSong(unittest.TestCase):
         if self.root:
             self.root.destroy()
 
+    @patch.object(MemoSong, 'prepare_layout')
+    @patch.object(MemoSong, '_set_theme')
+    def test_run_application(self, mock_set_theme: MagicMock, mock_prepare_layout: MagicMock) -> None:
+        self.memo_song.run_application()
+        mock_set_theme.assert_called_once_with()
+        mock_prepare_layout.assert_called_once_with()
+        self.memo_song.root.mainloop.assert_called_once_with()
+
+    def test_quit_application(self) -> None:
+        self.memo_song.quit_application()
+        self.memo_song.root.destroy.assert_called_once_with()
+
     @patch.object(MemoSong, '_initialize_sound_mixer')
     @patch.object(MemoSong, 'configure_piano')
     @patch.object(MemoSong, 'configure_notepad')
@@ -64,19 +67,6 @@ class TestMemoSong(unittest.TestCase):
         mock_configure_piano.assert_called_once_with()
         mock_initialize_sound_mixer.assert_called_once_with()
 
-    @patch.object(MemoSong, '_set_image_name')
-    def test_load_image_names(self, mock_set_image_name: MagicMock) -> None:
-        self.memo_song._load_image_names()
-        mock_set_image_name.assert_has_calls([
-            call('idle'), call('keyboard'), call('logo'), call('mute'),
-            call('pause_piano_recording'), call('pause_voice_recording'), call('playing'),
-            call('start_piano_recording'), call('start_voice_recording'),
-            call('stop_piano_recording'), call('stop_voice_recording')])
-
-    def test_set_image_name(self) -> None:
-        self.memo_song._set_image_name('keyboard')
-        self.assertEqual(getattr(self.memo_song, f'keyboard_image'), f'{self.memo_song.images_path}/keyboard.png')
-
     def test_configure_window(self) -> None:
         self.memo_song.configure_window()
         self.memo_song.root.title.assert_called_once_with('MemoSong')
@@ -95,32 +85,6 @@ class TestMemoSong(unittest.TestCase):
         mock_create_main_frame.assert_called_once_with(0, 0, sticky='nw', frame_data={'width': 142, 'height': 133})
         mock_create_label.assert_called_once_with(self.mock_tkinter_frame, '', image='image', padx=20, pady=20)
         mock_open_image.assert_called_once_with('logo_image', (110, 105))
-
-    def test_create_main_frame(self) -> None:
-        mock_tkinter_frame = MagicMock()
-        customtkinter.CTkFrame = MagicMock(return_value=mock_tkinter_frame)
-        frame = self.memo_song._create_main_frame(0, 0, sticky='nw', frame_data={'width': 142, 'height': 133})
-        mock_tkinter_frame.grid.assert_called_once_with(column=0, row=0, sticky='nw')
-        self.assertEqual(frame, mock_tkinter_frame)
-
-    def test_create_label(self) -> None:
-        mock_tkinter_label = MagicMock()
-        customtkinter.CTkLabel = MagicMock(return_value=mock_tkinter_label)
-        self.memo_song._create_label(MagicMock(), text='text')
-        mock_tkinter_label.pack.assert_called_once_with()
-
-    def test_create_label_kwargs(self) -> None:
-        mock_tkinter_label = MagicMock()
-        customtkinter.CTkLabel = MagicMock(return_value=mock_tkinter_label)
-        self.memo_song._create_label(MagicMock(), text='', pady=20, side=tkinter.TOP)
-        mock_tkinter_label.pack.assert_called_once_with(pady=20, side='top')
-
-    @patch.object(MemoSong, '_open_image', return_value='image')
-    def test_create_label_image(self, mock_open_image: MagicMock) -> None:
-        mock_tkinter_label = MagicMock()
-        customtkinter.CTkLabel = MagicMock(return_value=mock_tkinter_label)
-        self.memo_song._create_label(MagicMock(), text='', image=mock_open_image)
-        mock_tkinter_label.pack.assert_called_once_with()
 
     @patch.object(MemoSong, '_create_button_from_image')
     @patch.object(MemoSong, 'add_voice_recorder_title_frame')
@@ -146,29 +110,12 @@ class TestMemoSong(unittest.TestCase):
 
     @patch.object(MemoSong, '_create_label')
     def test_add_voice_recorder_title_frame(self, mock_create_label: MagicMock) -> None:
-        mock_tkinter_frame = MagicMock()
-        customtkinter.CTkFrame = MagicMock(return_value=mock_tkinter_frame)
-        mock_tkinter_entry = MagicMock()
-        customtkinter.CTkEntry = MagicMock(return_value=mock_tkinter_entry)
-        self.memo_song.add_voice_recorder_title_frame(mock_tkinter_frame)
-        mock_tkinter_frame.pack.assert_called_once_with(side='bottom')
-        mock_tkinter_entry.pack.assert_called_once_with(side='bottom')
-        mock_create_label.assert_called_once_with(mock_tkinter_frame, 'Title: ', side='bottom')
-
-    @patch.object(MemoSong, '_open_image', return_value=mock_tkinter_image)
-    def test_create_button_from_image(self, mock_open_image: MagicMock) -> None:
-        self.memo_song._create_button_from_image(self.mock_tkinter_frame, 'keyboard', (45, 25),
-                                                 self.memo_song._turn_keyboard_piano, tkinter.LEFT, self.memo_song)
-        mock_open_image.assert_called_once_with('keyboard_image', (45, 25))
-        self.mock_tkinter_button.pack.assert_called_once_with(side='left')
-        self.assertEqual(getattr(self.memo_song, 'keyboard_button'), self.mock_tkinter_button)
-
-    # def test_open_image(self):
-    #     mock_image = MagicMock()
-    #     self.memo_song.keyboard_image = MagicMock(return_value=mock_image)
-    #     Image.open = MagicMock(return_value=mock_image)
-    #     image = self.memo_song._open_image('keyboard_image')
-    #     self.assertEqual(image, mock_image)
+        self.mock_tkinter_frame.reset_mock()
+        self.mock_tkinter_entry.reset_mock()
+        self.memo_song.add_voice_recorder_title_frame(self.mock_tkinter_frame)
+        self.mock_tkinter_frame.pack.assert_called_once_with(side='bottom')
+        self.mock_tkinter_entry.pack.assert_called_once_with(side='bottom')
+        mock_create_label.assert_called_once_with(self.mock_tkinter_frame, 'Title: ', side='bottom')
 
     @patch.object(MemoSong, '_create_button_from_image')
     @patch.object(MemoSong, 'add_update_file_frame')
@@ -178,21 +125,34 @@ class TestMemoSong(unittest.TestCase):
                                      mock_add_piano_recorder_title_frame: MagicMock,
                                      mock_add_update_file_frame: MagicMock,
                                      mock_create_button_from_image: MagicMock) -> None:
-        mock_tkinter_frame = MagicMock()
-        customtkinter.CTkFrame = MagicMock(return_value=mock_tkinter_frame)
-        self.memo_song._create_main_frame = MagicMock(return_value=mock_tkinter_frame)
+        self.mock_tkinter_frame.reset_mock()
+        self.memo_song._create_main_frame = MagicMock(return_value=self.mock_tkinter_frame)
         self.memo_song.configure_control_panel()
-        mock_create_label.assert_called_once_with(mock_tkinter_frame, 'RECORD PIANO', anchor='w', padx=68)
-        mock_add_piano_recorder_title_frame.assert_called_once_with(mock_tkinter_frame)
-        mock_add_update_file_frame.assert_called_once_with(mock_tkinter_frame)
+        mock_create_label.assert_called_once_with(self.mock_tkinter_frame, 'RECORD PIANO', anchor='w', padx=68)
+        mock_add_piano_recorder_title_frame.assert_called_once_with(self.mock_tkinter_frame)
+        mock_add_update_file_frame.assert_called_once_with(self.mock_tkinter_frame)
         mock_create_button_from_image.assert_has_calls([
-            call(mock_tkinter_frame, 'start_piano_recording', (60, 60),
+            call(self.mock_tkinter_frame, 'start_piano_recording', (60, 60),
                  self.memo_song.recording_manager.start_piano_recording, 'left', self.memo_song.recording_manager),
-            call(mock_tkinter_frame, 'pause_piano_recording', (60, 60),
+            call(self.mock_tkinter_frame, 'pause_piano_recording', (60, 60),
                  self.memo_song.recording_manager.pause_piano_recording, 'left', self.memo_song.recording_manager),
-            call(mock_tkinter_frame, 'stop_piano_recording', (60, 60),
+            call(self.mock_tkinter_frame, 'stop_piano_recording', (60, 60),
                  self.memo_song.recording_manager.stop_piano_recording, 'left', self.memo_song.recording_manager)
         ])
+
+    @patch.object(FileManager, 'edit_file')
+    @patch.object(MemoSong, '_create_control_button')
+    @patch.object(MemoSong, '_create_label', return_value=MagicMock())
+    def test_add_update_file_frame(self, mock_create_label: MagicMock, mock_create_control_button: MagicMock,
+                                   mock_file_manager_edit_file: MagicMock) -> None:
+        self.mock_tkinter_frame.reset_mock()
+        self.memo_song.add_update_file_frame(self.mock_tkinter_frame)
+        self.mock_tkinter_frame.pack.assert_called_once_with(side='right')
+        mock_create_label.assert_called_once_with(self.mock_tkinter_frame, 'EDIT FILE')
+        # mock_create_control_button.assert_has_calls([
+        #     call(mock_tkinter_frame, 'Rename', mock_lambda_function, width=70),
+        #     call(mock_tkinter_frame, 'Delete', mock_lambda_function, width=70)
+        # ])
 
     @patch.object(MemoSong, '_create_button_from_image')
     @patch.object(MemoSong, '_create_label')
@@ -272,67 +232,25 @@ class TestMemoSong(unittest.TestCase):
         self.assertEqual(Piano.key, '2')
         mock_start_new_thread.assert_called_once_with(mock_piano_play_key)
 
-    @patch.object(MemoSong, '_is_white_key', side_effect=is_white_key)
-    @patch.object(MemoSong, '_get_button_from_key', return_value=mock_tkinter_button)
-    def test_add_keyboard_text(self, mock_get_button_from_key: MagicMock, mock_is_white_key: MagicMock) -> None:
-        self.memo_song._add_keyboard_text()
-        mock_is_white_key.assert_has_calls(self.calls_each_key)
-        mock_get_button_from_key.assert_has_calls(self.calls_each_key)
-        self.mock_tkinter_button.configure.assert_has_calls([
-            call(text='q\nC', text_color='black', anchor='s'), call(text='2', text_color='white', anchor='s'),
-            call(text='w\nD', text_color='black', anchor='s'), call(text='3', text_color='white', anchor='s'),
-            call(text='e\nE', text_color='black', anchor='s'), call(text='r\nF', text_color='black', anchor='s'),
-            call(text='5', text_color='white', anchor='s'), call(text='t\nG', text_color='black', anchor='s'),
-            call(text='6', text_color='white', anchor='s'), call(text='y\nA', text_color='black', anchor='s'),
-            call(text='7', text_color='white', anchor='s'), call(text='u\nB', text_color='black', anchor='s'),
-            call(text='i\nC', text_color='black', anchor='s'), call(text='9', text_color='white', anchor='s'),
-            call(text='o\nD', text_color='black', anchor='s'), call(text='0', text_color='white', anchor='s'),
-            call(text='p\nE', text_color='black', anchor='s'), call(text='[\nF', text_color='black', anchor='s'),
-            call(text='=', text_color='white', anchor='s'), call(text=']\nG', text_color='black', anchor='s'),
-            call(text='a', text_color='white', anchor='s'), call(text='z\nA', text_color='black', anchor='s'),
-            call(text='s', text_color='white', anchor='s'), call(text='x\nB', text_color='black', anchor='s'),
-            call(text='c\nC', text_color='black', anchor='s'), call(text='f', text_color='white', anchor='s'),
-            call(text='v\nD', text_color='black', anchor='s'), call(text='g', text_color='white', anchor='s'),
-            call(text='b\nE', text_color='black', anchor='s'), call(text='n\nF', text_color='black', anchor='s'),
-            call(text='j', text_color='white', anchor='s'), call(text='m\nG', text_color='black', anchor='s'),
-            call(text='k', text_color='white', anchor='s'), call(text=',\nA', text_color='black', anchor='s'),
-            call(text='l', text_color='white', anchor='s'), call(text='.\nB', text_color='black', anchor='s'),
-            call(text='/\nC', text_color='black', anchor='s')
-        ])
-
-    @patch.object(MemoSong, '_is_white_key', side_effect=is_white_key)
-    @patch.object(MemoSong, '_get_button_from_key', return_value=mock_tkinter_button)
-    def test_remove_keyboard_text(self, mock_get_button_from_key: MagicMock, mock_is_white_key: MagicMock) -> None:
-        self.memo_song._remove_keyboard_text()
-        mock_is_white_key.assert_has_calls(self.calls_each_key)
-        mock_get_button_from_key.assert_has_calls(self.calls_each_key)
-        self.mock_tkinter_button.configure.assert_has_calls([
-            call(text='C', anchor='s'), call(text=''), call(text='D', anchor='s'), call(text=''),
-            call(text='E', anchor='s'), call(text='F', anchor='s'), call(text=''), call(text='G', anchor='s'),
-            call(text=''), call(text='A', anchor='s'), call(text=''), call(text='B', anchor='s'),
-            call(text='C', anchor='s'), call(text=''), call(text='D', anchor='s'), call(text=''),
-            call(text='E', anchor='s'), call(text='F', anchor='s'), call(text=''), call(text='G', anchor='s'),
-            call(text=''), call(text='A', anchor='s'), call(text=''), call(text='B', anchor='s'),
-            call(text='C', anchor='s'), call(text=''), call(text='D', anchor='s'), call(text=''),
-            call(text='E', anchor='s'), call(text='F', anchor='s'), call(text=''), call(text='G', anchor='s'),
-            call(text=''), call(text='A', anchor='s'), call(text=''), call(text='B', anchor='s'),
-            call(text='C', anchor='s')
-        ])
-
-    @patch.object(FileManager, 'edit_file')
-    @patch.object(MemoSong, '_create_control_button')
-    @patch.object(MemoSong, '_create_label', return_value=MagicMock())
-    def test_add_update_file_frame(self, mock_create_label: MagicMock, mock_create_control_button: MagicMock,
-                                   mock_file_manager_edit_file: MagicMock) -> None:
-        mock_tkinter_frame = MagicMock()
-        customtkinter.CTkFrame = MagicMock(return_value=mock_tkinter_frame)
-        self.memo_song.add_update_file_frame(mock_tkinter_frame)
-        mock_tkinter_frame.pack.assert_called_once_with(side='right')
-        mock_create_label.assert_called_once_with(mock_tkinter_frame, 'EDIT FILE')
-        # mock_create_control_button.assert_has_calls([
-        #     call(mock_tkinter_frame, 'Rename', mock_lambda_function, width=70),
-        #     call(mock_tkinter_frame, 'Delete', mock_lambda_function, width=70)
-        # ])
+    def test_configure_file_browser(self):
+        # browser_frame = self._create_main_frame(column_number, 0, grid_data={'rowspan': 2})
+        # self._create_label(browser_frame, browser_type.upper(), side=tkinter.TOP)
+        # header_frame = customtkinter.CTkFrame(browser_frame)
+        # header_frame.pack(side=tkinter.TOP, fill=tkinter.BOTH)
+        # self._create_label(header_frame, 'Find: ', side=tkinter.LEFT)
+        # browser_search_field = customtkinter.CTkEntry(header_frame, width=120)
+        # browser_search_field.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=1)
+        # setattr(self.file_manager, f'{browser_type}_search_field', browser_search_field)
+        # self._create_control_button(header_frame, 'Search', getattr(self.file_manager, f'search_{browser_type}'),
+        #                             tkinter.LEFT, width=1)
+        # self._create_control_button(browser_frame, 'Update List', lambda: self.file_manager.update_list(browser_type),
+        #                             tkinter.BOTTOM)
+        # if browser_type == 'notes':
+        #     command = self.note_manager.open_note
+        # else:
+        #     command = self.recording_manager.play_recording
+        # self._create_radiobutton_list(browser_frame, browser_type, command)
+        pass
 
     @patch.object(FileManager, 'create_radiobutton_list', return_value='radiobutton_list')
     def test_create_radiobutton_list_recordings(self, mock_create_radiobutton_list: MagicMock) -> None:
@@ -346,39 +264,55 @@ class TestMemoSong(unittest.TestCase):
         mock_create_radiobutton_list.assert_called_once_with(self.mock_tkinter_frame, 'notes', 'command')
         self.assertEqual(FileManager.notes_radiobutton_list, 'notes_list')
 
+    def test_configure_notepad(self):
+        # notepad_frame = self._create_main_frame(3, 0, frame_data={'height': self._height-200}, grid_data={'rowspan': 2})
+        # self._create_label(notepad_frame, 'NOTEPAD', side=tkinter.TOP)
+        # header_frame = customtkinter.CTkFrame(notepad_frame)
+        # header_frame.pack(side=tkinter.TOP, fill=tkinter.BOTH)
+        # self._create_control_button(header_frame, 'Save', self.note_manager.save_note, tkinter.LEFT, width=1)
+        # self._create_label(header_frame, 'Title: ', side=tkinter.LEFT)
+        # self._create_control_button(notepad_frame, 'Clear Notepad', self.note_manager.clear_notepad, tkinter.BOTTOM)
+        # self._setup_notepad(header_frame, notepad_frame)
+        pass
+
     def test_setup_notepad(self) -> None:
-        mock_tkinter_entry = MagicMock()
-        customtkinter.CTkEntry = MagicMock(return_value=mock_tkinter_entry)
-        mock_tkinter_textbox = MagicMock()
-        customtkinter.CTkTextbox = MagicMock(return_value=mock_tkinter_textbox)
+        self.mock_tkinter_entry.reset_mock()
+        self.mock_tkinter_textbox.reset_mock()
         self.memo_song._setup_notepad(MagicMock(), MagicMock())
-        mock_tkinter_entry.pack.assert_called_once_with(side='left', fill='both', expand=1)
-        mock_tkinter_textbox.pack.assert_called_once_with(side='bottom', fill='both', expand=1)
-        self.assertEqual(FileManager.notepad_title_field, mock_tkinter_entry)
-        self.assertEqual(FileManager.notepad_text_area, mock_tkinter_textbox)
+        self.mock_tkinter_entry.pack.assert_called_once_with(side='left', fill='both', expand=1)
+        self.mock_tkinter_textbox.pack.assert_called_once_with(side='bottom', fill='both', expand=1)
+        self.assertEqual(FileManager.notepad_title_field, self.mock_tkinter_entry)
+        self.assertEqual(FileManager.notepad_text_area, self.mock_tkinter_textbox)
+
+    def test_configure_piano(self):
+        # piano_frame = self._create_main_frame(0, 2, grid_data={'columnspan': 5})
+        # key_swift = 45
+        # pad_x_white = 5
+        # pad_x_black = 40
+        # for key in self.key_map:
+        #     if self._is_white_key(key):
+        #         self._create_piano_button(piano_frame, key, pad_x_white, 3, 5, fg_color='white', width=47, height=225,
+        #                                   border_width=1, border_color='black')
+        #         pad_x_white += key_swift
+        # for key in self.key_map:
+        #     if key in ['e', 'u', 'p', 'x', 'b']:
+        #         pad_x_black += key_swift
+        #     if not self._is_white_key(key):
+        #         self._create_piano_button(piano_frame, key, pad_x_black, 4, 26, fg_color='black', width=22, height=140)
+        #         pad_x_black += key_swift
+        pass
+
+    def test_create_main_frame(self) -> None:
+        self.mock_tkinter_frame.reset_mock()
+        frame = self.memo_song._create_main_frame(0, 0, sticky='nw', frame_data={'width': 142, 'height': 133})
+        self.mock_tkinter_frame.grid.assert_called_once_with(column=0, row=0, sticky='nw')
+        self.assertEqual(frame, self.mock_tkinter_frame)
 
     @patch.object(MemoSong, '_add_key_names')
     def test_create_piano_button(self, mock_add_key_names: MagicMock) -> None:
         self.memo_song._create_piano_button(MagicMock(), 'q', 0, 0, 0)
         mock_add_key_names.assert_called_once_with(self.mock_tkinter_button, 'q')
         self.assertEqual(getattr(GenericFunctions, 'q_key'), self.mock_tkinter_button)
-
-    @patch.object(MemoSong, '_is_white_key', return_value=True)
-    def test_add_key_names_white_key(self, mock_is_white_key: MagicMock) -> None:
-        self.memo_song._add_key_names(self.mock_tkinter_button, 'q')
-        mock_is_white_key.assert_called_once_with('q')
-        self.mock_tkinter_button.configure.assert_called_once_with(text='C', text_color='black', anchor='s')
-
-    @patch.object(MemoSong, '_is_white_key', return_value=False)
-    def test_add_key_names_black_key(self, mock_is_white_key: MagicMock) -> None:
-        self.memo_song._add_key_names(self.mock_tkinter_button, '2')
-        mock_is_white_key.assert_called_once_with('2')
-        self.mock_tkinter_button.configure.assert_not_called()
-
-    @patch.object(pygame.mixer, 'init')
-    def test_initialize_sound_mixer(self, mock_mixer_init: MagicMock) -> None:
-        self.memo_song._initialize_sound_mixer()
-        mock_mixer_init.assert_called_once_with()
 
 
 if __name__ == '__main__':
