@@ -2,6 +2,7 @@ from mock import call, MagicMock
 import tkinter
 import customtkinter
 import CTkMessagebox
+import pyaudio
 
 mock_tkinter_frame = MagicMock()
 customtkinter.CTkFrame = MagicMock(return_value=mock_tkinter_frame)
@@ -26,6 +27,10 @@ not_empty_radiobutton_list = [mock_tkinter_radiobutton1, mock_tkinter_radiobutto
 
 mock_event = MagicMock()
 tkinter.Event = MagicMock(return_value=mock_event)
+
+mock_pyaudio = MagicMock()
+pyaudio.PyAudio = MagicMock(return_value=mock_pyaudio)
+mock_stream = mock_pyaudio.open
 
 is_white_key = 3 * [True, False, True, False, True, True, False, True, False, True, False, True] + [True]
 
