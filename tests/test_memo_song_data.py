@@ -15,8 +15,15 @@ mock_tkinter_image = MagicMock()
 customtkinter.CTkImage = MagicMock(return_value=mock_tkinter_image)
 mock_tkinter_textbox = MagicMock()
 customtkinter.CTkTextbox = MagicMock(return_value=mock_tkinter_textbox)
+mock_tkinter_input_dialog = MagicMock()
+customtkinter.CTkInputDialog = MagicMock(return_value=mock_tkinter_input_dialog)
 mock_tkinter_messagebox = MagicMock()
 CTkMessagebox.CTkMessagebox = MagicMock(return_value=mock_tkinter_messagebox)
+mock_tkinter_radiobutton1 = MagicMock()
+mock_tkinter_radiobutton2 = MagicMock()
+customtkinter.CTkRadioButton = MagicMock(side_effect=[mock_tkinter_radiobutton1, mock_tkinter_radiobutton2])
+not_empty_radiobutton_list = [mock_tkinter_radiobutton1, mock_tkinter_radiobutton2]
+
 mock_event = MagicMock()
 tkinter.Event = MagicMock(return_value=mock_event)
 
@@ -111,3 +118,7 @@ calls_remove_keyboard_text = [
     call(text=''), call(text='A', anchor='s'), call(text=''), call(text='B', anchor='s'),
     call(text='C', anchor='s')
 ]
+
+os_error = '[WinError 123] The filename, directory name, or volume label syntax is incorrect: {} -> {}'
+incorrect_file_error = 'The filename, directory name, or volume label syntax is incorrect'
+file_not_found_error = '[WinError 2] The system cannot find the file specified: {}/recordings/not_existent'
