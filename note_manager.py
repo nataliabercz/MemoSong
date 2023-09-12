@@ -19,7 +19,7 @@ class NoteManager(FileManager):
 
     def save_note(self) -> None:
         is_overwritten = False
-        filename = self._get_filename(self.notepad_title_field.get(), 'notes')
+        filename = self._get_full_filename(self.notepad_title_field.get(), 'notes')
         current_selection = self._get_curselection_from_radiobutton_list(self.notes_radiobutton_list)
         if self._filename_exists('notes', filename) and filename != current_selection:
             msg = self._display_message_box('OVERWRITE FILE', f'The file\n{filename} already exists.\nOverwrite?', True)

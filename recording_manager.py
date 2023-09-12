@@ -61,7 +61,7 @@ class RecordingManager(FileManager):
                 self._setup_recorder(recorder, recording_type, title)
 
     def _get_recording_title(self, recording_type: str) -> str:
-        return self._get_filename(self._get_title_field(recording_type).get(), 'recordings', f'{recording_type}_')
+        return self._get_full_filename(self._get_title_field(recording_type).get(), 'recordings', f'{recording_type}_')
 
     def _setup_recorder(self, recorder: Any, recording_type: str, title: str) -> None:
         setattr(self, f'{recording_type}_recording_title', title)

@@ -78,7 +78,7 @@ class FileManager(GenericFunctions):
         except FileNotFoundError:
             pass
 
-    def _get_filename(self, filename: str, browser_type: str, prefix: Optional[str] = '') -> str:
+    def _get_full_filename(self, filename: str, browser_type: str, prefix: Optional[str] = '') -> str:
         if not self._directory_exists(browser_type):
             self._create_directory(browser_type)
         if filename == '':
