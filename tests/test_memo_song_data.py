@@ -1,8 +1,10 @@
 from mock import call, MagicMock
+import os
+import pydub
+import pyaudio
 import tkinter
 import customtkinter
 import CTkMessagebox
-import pyaudio
 
 mock_tkinter_frame = MagicMock()
 customtkinter.CTkFrame = MagicMock(return_value=mock_tkinter_frame)
@@ -31,6 +33,9 @@ tkinter.Event = MagicMock(return_value=mock_event)
 mock_pyaudio = MagicMock()
 pyaudio.PyAudio = MagicMock(return_value=mock_pyaudio)
 mock_stream = mock_pyaudio.open
+
+mock_sound = MagicMock()
+pydub.AudioSegment = MagicMock(return_value=mock_sound)
 
 is_white_key = 3 * [True, False, True, False, True, True, False, True, False, True, False, True] + [True]
 
@@ -122,6 +127,23 @@ calls_remove_keyboard_text = [
     call(text='E', anchor='s'), call(text='F', anchor='s'), call(text=''), call(text='G', anchor='s'),
     call(text=''), call(text='A', anchor='s'), call(text=''), call(text='B', anchor='s'),
     call(text='C', anchor='s')
+]
+
+keys_path = f'{os.path.dirname(os.path.realpath("../piano_recorder.py"))}/data/keys'
+calls_pydub_from_wav = [
+    call(f'{keys_path}/c3.wav'), call(f'{keys_path}/c#3.wav'), call(f'{keys_path}/d3.wav'),
+    call(f'{keys_path}/d#3.wav'), call(f'{keys_path}/e3.wav'), call(f'{keys_path}/f3.wav'),
+    call(f'{keys_path}/f#3.wav'), call(f'{keys_path}/g3.wav'), call(f'{keys_path}/g#3.wav'),
+    call(f'{keys_path}/a3.wav'), call(f'{keys_path}/a#3.wav'), call(f'{keys_path}/b3.wav'),
+    call(f'{keys_path}/c4.wav'), call(f'{keys_path}/c#4.wav'), call(f'{keys_path}/d4.wav'),
+    call(f'{keys_path}/d#4.wav'), call(f'{keys_path}/e4.wav'), call(f'{keys_path}/f4.wav'),
+    call(f'{keys_path}/f#4.wav'), call(f'{keys_path}/g4.wav'), call(f'{keys_path}/g#4.wav'),
+    call(f'{keys_path}/a4.wav'), call(f'{keys_path}/a#4.wav'), call(f'{keys_path}/b4.wav'),
+    call(f'{keys_path}/c5.wav'), call(f'{keys_path}/c#5.wav'), call(f'{keys_path}/d5.wav'),
+    call(f'{keys_path}/d#5.wav'), call(f'{keys_path}/e5.wav'), call(f'{keys_path}/f5.wav'),
+    call(f'{keys_path}/f#5.wav'), call(f'{keys_path}/g5.wav'), call(f'{keys_path}/g#5.wav'),
+    call(f'{keys_path}/a5.wav'), call(f'{keys_path}/a#5.wav'), call(f'{keys_path}/b5.wav'),
+    call(f'{keys_path}/c6.wav')
 ]
 
 os_error = '[WinError 123] The filename, directory name, or volume label syntax is incorrect: {} -> {}'
