@@ -15,16 +15,25 @@ class VoiceRecorder:
     _stream = None
     _frames = []
 
-    def record(self):
+    def record(self) -> None:
         self._frames = []
         self._prepare_audio()
-        while self.recording:
-            while self.paused:
-                # it's very slow
-                pass
-            data = self._stream.read(self._chunk)
-            self._frames.append(data)
+        self._loop_recording()
         self._stop_recording()
+
+    def _loop_recording(self) -> None:
+        while self.recording:
+            self._loop_pause()
+            self._append_recorded_data()
+
+    def _loop_pause(self) -> None:
+        while self.paused:
+            # it's very slow - block keyboard completely
+            pass
+
+    def _append_recorded_data(self) -> None:
+        data = self._stream.read(self._chunk)
+        self._frames.append(data)
 
     def _prepare_audio(self) -> None:
         self._audio = pyaudio.PyAudio()
