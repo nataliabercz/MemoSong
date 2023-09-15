@@ -5,17 +5,20 @@ from file_manager import FileManager
 class NoteManager(FileManager):
     def open_note(self) -> None:
         FileManager._current_browser_type = 'notes'
+        # what if file suddenly doesn't exist
         try:
             if note := self._get_curselection_from_radiobutton_list(self.notes_radiobutton_list):
                 self._remove_selection_from_radiobutton_list(self.recordings_radiobutton_list)
                 self.clear_notepad()
-                with open(f'{self.app_path}/notes/{note}') as file:
-                    for line in file:
-                        self.notepad_text_area.insert(tkinter.END, line)
-                    file.close()
-                self.notepad_title_field.insert(0, ''.join(note.split('.')[0:-1]))
+                self._open_note(note)
         except (UnicodeDecodeError, FileNotFoundError, OSError):
             self._display_message_box('ERROR', f'Invalid file!', False, 300)
+
+    def _open_note(self, note: str) -> None:
+        with open(f'{self.app_path}/notes/{note}') as file:
+            for line in file:
+                self.notepad_text_area.insert(tkinter.END, line)
+        self.notepad_title_field.insert(0, ''.join(note.split('.')[0:-1]))
 
     def save_note(self) -> None:
         is_overwritten = False
@@ -32,7 +35,7 @@ class NoteManager(FileManager):
             try:
                 self._save_note(filename)
             except OSError:
-                FileManager._display_message_box('ERROR', f'Invalid name!', False, 300)
+                self._display_message_box('ERROR', f'Invalid name!', False, 300)
                 return
         if filename != self.notes_radiobutton_list.get_selected_item() and not is_overwritten:
             self.notes_radiobutton_list.add_item(filename)
@@ -40,8 +43,3 @@ class NoteManager(FileManager):
     def _save_note(self, filename: str) -> None:
         with open(f'{self.app_path}/notes/{filename}', 'w') as file:
             file.write(self.notepad_text_area.get(1.0, tkinter.END))
-            file.close()
-
-    def clear_notepad(self) -> None:
-        self.notepad_title_field.delete(0, tkinter.END)
-        self.notepad_text_area.delete('1.0', tkinter.END)
