@@ -5,7 +5,7 @@ from note_manager import NoteManager
 from test_memo_song_data import *
 
 
-class TestMemoSong(unittest.TestCase):
+class TestNoteManager(unittest.TestCase):
     def setUp(self) -> None:
         self.note_manager_cls = NoteManager()
 

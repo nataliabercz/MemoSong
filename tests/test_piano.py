@@ -4,7 +4,7 @@ from mock import MagicMock, patch
 from piano import Piano
 
 
-class TestMemoSong(unittest.TestCase):
+class TestPiano(unittest.TestCase):
     def setUp(self) -> None:
         self.piano_cls = Piano()
 
