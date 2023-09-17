@@ -12,6 +12,10 @@ mock_tkinter_label = MagicMock()
 customtkinter.CTkLabel = MagicMock(return_value=mock_tkinter_label)
 mock_tkinter_button = MagicMock()
 customtkinter.CTkButton = MagicMock(return_value=mock_tkinter_button)
+
+mock_scrollable_radiobutton_frame = MagicMock()
+scrollable_radiobutton_frame.ScrollableRadiobuttonFrame = MagicMock(return_value=mock_scrollable_radiobutton_frame)
+
 mock_tkinter_entry = MagicMock()
 customtkinter.CTkEntry = MagicMock(return_value=mock_tkinter_entry)
 mock_tkinter_image = MagicMock()
@@ -22,10 +26,11 @@ mock_tkinter_input_dialog = MagicMock()
 customtkinter.CTkInputDialog = MagicMock(return_value=mock_tkinter_input_dialog)
 mock_tkinter_messagebox = MagicMock()
 CTkMessagebox.CTkMessagebox = MagicMock(return_value=mock_tkinter_messagebox)
-mock_tkinter_radiobutton1 = MagicMock()
-mock_tkinter_radiobutton2 = MagicMock()
-customtkinter.CTkRadioButton = MagicMock(side_effect=[mock_tkinter_radiobutton1, mock_tkinter_radiobutton2])
-not_empty_radiobutton_list = [mock_tkinter_radiobutton1, mock_tkinter_radiobutton2]
+
+mock_tkinter_radiobutton_1 = MagicMock()
+mock_tkinter_radiobutton_2 = MagicMock()
+customtkinter.CTkRadioButton = MagicMock(side_effect=[mock_tkinter_radiobutton_1, mock_tkinter_radiobutton_2])
+not_empty_radiobutton_list = [mock_tkinter_radiobutton_1, mock_tkinter_radiobutton_2]
 
 mock_event = MagicMock()
 tkinter.Event = MagicMock(return_value=mock_event)
