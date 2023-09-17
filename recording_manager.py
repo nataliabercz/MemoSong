@@ -1,4 +1,3 @@
-import os
 import time
 import pygame
 import tkinter
@@ -44,24 +43,29 @@ class RecordingManager(FileManager):
     def _start_recording(self, recording_type: str) -> None:
         recorder = self._get_recorder(recording_type)
         if not recorder.recording:
-            recorder.paused = False
-            self._highlight_used_function(f'pause_{recording_type}_recording', 'off')
-            self._highlight_used_function(f'start_{recording_type}_recording', 'on')
-            title = self._get_recording_title(recording_type)
-            if title in os.listdir(f'{self.app_path}/recordings'):
-                msg = self._display_message_box('OVERWRITE FILE', f'The file\n{title} already exists. Overwrite?', True)
-                if msg.get() == 'Yes':
-                    self._mute_playback()
-                    self._setup_recorder(recorder, recording_type, title)
-                    self._remove_file(title)
-                    self.update_list('recordings')  # it would be better to remove only 1 item from this list
-                else:
-                    self._highlight_used_function(f'start_{recording_type}_recording', 'off')
-            else:
-                self._setup_recorder(recorder, recording_type, title)
+            self._start_recorder(recorder, recording_type)
 
-    def _get_recording_title(self, recording_type: str) -> str:
-        return self._get_full_filename(self._get_title_field(recording_type).get(), 'recordings', f'{recording_type}_')
+    def _start_recorder(self, recorder: Any, recording_type: str) -> None:
+        recorder.paused = False
+        self._modify_buttons_highlight(recording_type, 'on')
+        title = self._get_recording_title(recording_type)
+        if title in self._list_files(f'{self.app_path}/recordings'):
+            self._check_whether_to_overwrite(recorder, recording_type, title)
+        else:
+            self._setup_recorder(recorder, recording_type, title)
+
+    def _check_whether_to_overwrite(self, recorder: Any, recording_type: str, title: str) -> None:
+        msg = self._display_message_box('OVERWRITE FILE', f'The file\n{title} already exists. Overwrite?', True)
+        if msg.get() == 'Yes':
+            self._setup_recorder_and_overwrite(recorder, recording_type, title)
+        else:
+            self._highlight_button(f'start_{recording_type}_recording', 'off')
+
+    def _setup_recorder_and_overwrite(self, recorder: Any, recording_type: str, title: str) -> None:
+        self._mute_playback()
+        self._setup_recorder(recorder, recording_type, title)
+        self._remove_file(title)
+        self.update_list('recordings')  # it would be better to remove only 1 item from this list
 
     def _setup_recorder(self, recorder: Any, recording_type: str, title: str) -> None:
         setattr(self, f'{recording_type}_recording_title', title)
@@ -83,23 +87,35 @@ class RecordingManager(FileManager):
         self._setup_pause(recorder, recording_type, 'on')
 
     def _setup_pause(self, recorder: Any, recording_type: str, option: str) -> None:
-        self._highlight_used_function(f'pause_{recording_type}_recording', option)
+        self._highlight_button(f'pause_{recording_type}_recording', option)
         recorder.paused = True if option == 'on' else False
 
     def _stop_recording(self, recording_type: str) -> None:
         recorder = self._get_recorder(recording_type)
         if recorder.recording:
-            recorder.paused = False
-            self._highlight_used_function(f'pause_{recording_type}_recording', 'off')
-            self._highlight_used_function(f'start_{recording_type}_recording', 'off')
-            recorder.recording = False
-            self._get_title_field(recording_type).configure(state='normal')
-            self.recordings_radiobutton_list.add_item(getattr(self, f'{recording_type}_recording_title'))
-            title_field = getattr(self, f'{recording_type}_recording_title_field')
-            title_field.delete(0, tkinter.END)
+            self._stop_recorder(recorder, recording_type)
+
+    def _stop_recorder(self, recorder: Any, recording_type: str) -> None:
+        recorder.paused = False
+        self._modify_buttons_highlight(recording_type, 'off')
+        recorder.recording = False
+        self._modify_title_field(recording_type)
+        self.recordings_radiobutton_list.add_item(self._get_recording_title(recording_type))
+
+    def _modify_title_field(self, recording_type: str) -> None:
+        title_field = self._get_title_field(recording_type)
+        title_field.configure(state='normal')
+        title_field.delete(0, tkinter.END)
+
+    def _get_recording_title(self, recording_type: str) -> str:
+        return self._get_full_filename(self._get_title_field(recording_type).get(), 'recordings', f'{recording_type}_')
+
+    def _get_title_field(self, recording_type: str) -> customtkinter.CTkEntry:
+        return getattr(self, f'{recording_type}_recording_title_field')
 
     def _get_recorder(self, recording_type: str) -> Any:
         return getattr(self, f'{recording_type}_recorder')
 
-    def _get_title_field(self, recording_type: str) -> customtkinter.CTkEntry:
-        return getattr(self, f'{recording_type}_recording_title_field')
+    def _modify_buttons_highlight(self, recording_type: str, start_option: str) -> None:
+        for item in [['pause', 'off'], ['start', start_option]]:
+            self._highlight_button(f'{item[0]}_{recording_type}_recording', item[1])
