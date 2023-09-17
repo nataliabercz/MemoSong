@@ -102,19 +102,19 @@ class MemoSong(GenericFunctions):
         if not self.keyboard_on:
             self.root.focus()
             self.keyboard_on = True
-            self._highlight_used_function('keyboard', 'on')
+            self._highlight_button('keyboard', 'on')
             self.root.bind('<Key>', self._play_pressed_key)
             self._add_keyboard_text()
         else:
             self.keyboard_on = False
-            self._highlight_used_function('keyboard', 'off')
+            self._highlight_button('keyboard', 'off')
             self.root.unbind('<Key>')
             self._remove_keyboard_text()
 
     def _play_pressed_key(self, event: tkinter.Event) -> None:
         key = event.char.lower()
         if key in self.key_map:
-            self._highlight_button(key)
+            self._highlight_piano_key(key)
             self.root.update_idletasks()
             self._play_key(key)
 

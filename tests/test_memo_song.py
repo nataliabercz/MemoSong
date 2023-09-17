@@ -153,46 +153,46 @@ class TestMemoSong(unittest.TestCase):
         self.memo_song_cls.root.bind.assert_called_once_with('`', self.memo_song_cls._turn_keyboard_piano)
 
     @patch.object(MemoSong, '_add_keyboard_text')
-    @patch.object(MemoSong, '_highlight_used_function')
-    def test_turn_keyboard_piano_on(self, mock_highlight_used_function: MagicMock,
+    @patch.object(MemoSong, '_highlight_button')
+    def test_turn_keyboard_piano_on(self, mock_highlight_button: MagicMock,
                                     mock_add_keyboard_text: MagicMock) -> None:
         self.memo_song_cls.keyboard_on = False
         self.memo_song_cls._turn_keyboard_piano()
         self.memo_song_cls.root.focus.assert_called_once_with()
-        mock_highlight_used_function.assert_called_once_with('keyboard', 'on')
+        mock_highlight_button.assert_called_once_with('keyboard', 'on')
         self.memo_song_cls.root.bind.assert_called_once_with('<Key>', self.memo_song_cls._play_pressed_key)
         mock_add_keyboard_text.assert_called_once_with()
         self.assertEqual(self.memo_song_cls.keyboard_on, True)
 
     @patch.object(MemoSong, '_remove_keyboard_text')
-    @patch.object(MemoSong, '_highlight_used_function')
-    def test_turn_keyboard_piano_off(self, mock_highlight_used_function: MagicMock,
+    @patch.object(MemoSong, '_highlight_button')
+    def test_turn_keyboard_piano_off(self, mock_highlight_button: MagicMock,
                                      mock_remove_keyboard_text: MagicMock) -> None:
         self.memo_song_cls.keyboard_on = True
         self.memo_song_cls._turn_keyboard_piano()
-        mock_highlight_used_function.assert_called_once_with('keyboard', 'off')
+        mock_highlight_button.assert_called_once_with('keyboard', 'off')
         self.memo_song_cls.root.unbind.assert_called_once_with('<Key>')
         mock_remove_keyboard_text.assert_called_once_with()
         self.assertEqual(self.memo_song_cls.keyboard_on, False)
 
     @patch.object(MemoSong, '_play_key')
-    @patch.object(MemoSong, '_highlight_button')
-    def test_play_pressed_key(self, mock_highlight_button: MagicMock, mock_play_key: MagicMock) -> None:
-        mock_event.char.lower = MagicMock(return_value='q')
+    @patch.object(MemoSong, '_highlight_piano_key')
+    def test_play_pressed_key(self, mock_highlight_piano_key: MagicMock, mock_play_key: MagicMock) -> None:
+        mock_tkinter_event.char.lower = MagicMock(return_value='q')
         self.memo_song_cls.root.update_idletasks = MagicMock()
-        self.memo_song_cls._play_pressed_key(mock_event)
-        mock_event.char.lower.assert_called_once_with()
-        mock_highlight_button.assert_called_once_with('q')
+        self.memo_song_cls._play_pressed_key(mock_tkinter_event)
+        mock_tkinter_event.char.lower.assert_called_once_with()
+        mock_highlight_piano_key.assert_called_once_with('q')
         self.memo_song_cls.root.update_idletasks.assert_called_once_with()
         mock_play_key.assert_called_once_with('q')
 
     @patch.object(MemoSong, '_play_key')
     @patch.object(MemoSong, '_highlight_button')
     def test_play_pressed_key_wrong_key(self, mock_highlight_button: MagicMock, mock_play_key: MagicMock) -> None:
-        mock_event.char.lower = MagicMock(return_value='1')
+        mock_tkinter_event.char.lower = MagicMock(return_value='1')
         self.memo_song_cls.root.update_idletasks = MagicMock()
-        self.memo_song_cls._play_pressed_key(mock_event)
-        mock_event.char.lower.assert_called_once_with()
+        self.memo_song_cls._play_pressed_key(mock_tkinter_event)
+        mock_tkinter_event.char.lower.assert_called_once_with()
         mock_highlight_button.assert_not_called()
         self.memo_song_cls.root.update_idletasks.assert_not_called()
         mock_play_key.assert_not_called()
@@ -299,7 +299,3 @@ class TestMemoSong(unittest.TestCase):
         self.memo_song_cls._create_piano_button(MagicMock(), 'q', 0, 0, 0)
         mock_add_key_names.assert_called_once_with(mock_tkinter_button, 'q')
         self.assertEqual(getattr(self.memo_song_cls, 'q_key'), mock_tkinter_button)
-
-
-if __name__ == '__main__':
-    unittest.main()
