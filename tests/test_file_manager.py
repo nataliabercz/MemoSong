@@ -44,8 +44,8 @@ class TestFileManager(unittest.TestCase):
     @patch.object(FileManager, '_delete_file')
     @patch.object(FileManager, '_get_curselection_from_radiobutton_list', return_value='file')
     def test_edit_file_rename_no_browser_type(self, mock_get_curselection_from_radiobutton_list: MagicMock,
-                                       mock_rename_file: MagicMock, mock_delete_file: MagicMock,
-                                       mock_display_message_box: MagicMock) -> None:
+                                              mock_rename_file: MagicMock, mock_delete_file: MagicMock,
+                                              mock_display_message_box: MagicMock) -> None:
         self.file_manager_cls._current_browser_type = None
         self.file_manager_cls.edit_file('rename')
         mock_get_curselection_from_radiobutton_list.assert_not_called()
@@ -58,8 +58,8 @@ class TestFileManager(unittest.TestCase):
     @patch.object(FileManager, '_delete_file')
     @patch.object(FileManager, '_get_curselection_from_radiobutton_list', return_value='file')
     def test_edit_file_delete_no_browser_type(self, mock_get_curselection_from_radiobutton_list: MagicMock,
-                                       mock_rename_file: MagicMock, mock_delete_file: MagicMock,
-                                       mock_display_message_box: MagicMock) -> None:
+                                              mock_rename_file: MagicMock, mock_delete_file: MagicMock,
+                                              mock_display_message_box: MagicMock) -> None:
         self.file_manager_cls._current_browser_type = None
         self.file_manager_cls.edit_file('delete')
         mock_get_curselection_from_radiobutton_list.assert_not_called()
@@ -89,7 +89,7 @@ class TestFileManager(unittest.TestCase):
     @patch('os.rename')
     @patch.object(FileManager, '_mute_playback')
     def test_rename_file_recording(self, mock_mute_playback: MagicMock, mock_os_rename: MagicMock,
-                                   mock_update_list: MagicMock,  mock_notepad_title_field: MagicMock,
+                                   mock_update_list: MagicMock, mock_notepad_title_field: MagicMock,
                                    mock_display_message_box) -> None:
         mock_tkinter_input_dialog.get_input.return_value = 'new_name'
         self.file_manager_cls._current_browser_type = 'recordings'
@@ -145,16 +145,60 @@ class TestFileManager(unittest.TestCase):
         mock_notepad_title_field.insert.assert_not_called()
         mock_display_message_box.assert_called_once_with('ERROR', incorrect_file_error, False, 300)
 
+    @patch.object(FileManager, 'clear_notepad')
     @patch.object(FileManager, 'update_list')
     @patch.object(FileManager, '_remove_file')
     @patch.object(FileManager, '_mute_playback')
     @patch.object(FileManager, '_display_message_box', return_value=mock_tkinter_messagebox)
     def test_delete_file_recording(self, mock_display_message_box: MagicMock, mock_mute_playback: MagicMock,
-                                   mock_remove_file: MagicMock, mock_update_list: MagicMock) -> None:
+                                   mock_remove_file: MagicMock, mock_update_list: MagicMock,
+                                   mock_clear_notepad: MagicMock) -> None:
+        mock_tkinter_messagebox.reset_mock()
+        mock_tkinter_messagebox.get.return_value = 'Yes'
         self.file_manager_cls._current_browser_type = 'recordings'
         self.file_manager_cls._delete_file('file')
-        mock_tkinter_messagebox.get = MagicMock(return_value='Yes')
-        # mock_mute_playback.assert_called_once_with()
+        mock_display_message_box.assert_called_once_with('DELETE FILE', 'Do you want to delete\nfile?', True)
+        mock_mute_playback.assert_called_once_with()
+        mock_remove_file.assert_called_once_with('file')
+        mock_update_list.assert_called_once_with('recordings')
+        mock_clear_notepad.assert_not_called()
+        mock_tkinter_messagebox.destroy.assert_not_called()
+
+    @patch.object(FileManager, 'clear_notepad')
+    @patch.object(FileManager, 'update_list')
+    @patch.object(FileManager, '_remove_file')
+    @patch.object(FileManager, '_mute_playback')
+    @patch.object(FileManager, '_display_message_box', return_value=mock_tkinter_messagebox)
+    def test_delete_file_note(self, mock_display_message_box: MagicMock, mock_mute_playback: MagicMock,
+                              mock_remove_file: MagicMock, mock_update_list: MagicMock,
+                              mock_clear_notepad: MagicMock) -> None:
+        mock_tkinter_messagebox.reset_mock()
+        mock_tkinter_messagebox.get.return_value = 'Yes'
+        self.file_manager_cls._current_browser_type = 'notes'
+        self.file_manager_cls._delete_file('file')
+        mock_display_message_box.assert_called_once_with('DELETE FILE', 'Do you want to delete\nfile?', True)
+        mock_mute_playback.assert_not_called()
+        mock_remove_file.assert_called_once_with('file')
+        mock_update_list.assert_called_once_with('notes')
+        mock_clear_notepad.assert_called_once_with()
+        mock_tkinter_messagebox.destroy.assert_not_called()
+
+    @patch.object(FileManager, 'clear_notepad')
+    @patch.object(FileManager, 'update_list')
+    @patch.object(FileManager, '_remove_file')
+    @patch.object(FileManager, '_mute_playback')
+    @patch.object(FileManager, '_display_message_box', return_value=mock_tkinter_messagebox)
+    def test_delete_file_cancelled(self, mock_display_message_box: MagicMock, mock_mute_playback: MagicMock,
+                                   mock_remove_file: MagicMock, mock_update_list: MagicMock,
+                                   mock_clear_notepad: MagicMock) -> None:
+        mock_tkinter_messagebox.get.return_value = 'No'
+        self.file_manager_cls._current_browser_type = 'recordings'
+        self.file_manager_cls._delete_file('file')
+        mock_display_message_box.assert_called_once_with('DELETE FILE', 'Do you want to delete\nfile?', True)
+        mock_mute_playback.assert_not_called()
+        mock_remove_file.assert_not_called()
+        mock_update_list.assert_not_called()
+        mock_clear_notepad.assert_not_called()
         mock_tkinter_messagebox.destroy.assert_called_once_with()
         # mock_remove_file.assert_called_once_with()
         # mock_update_list.assert_called_once_with()
@@ -189,6 +233,15 @@ class TestFileManager(unittest.TestCase):
         self.file_manager_cls._current_browser_type = 'recordings'
         self.file_manager_cls._remove_file('not_existent')
         mock_os_remove.assert_called_once_with(f'{self.file_manager_cls.app_path}/recordings/not_existent')
+
+    @patch.object(FileManager, 'notepad_text_area', return_value=mock_tkinter_textbox)
+    @patch.object(FileManager, 'notepad_title_field', return_value=mock_tkinter_entry)
+    def test_clear_notepad(self, mock_notepad_title_field: MagicMock, mock_notepad_text_area: MagicMock) -> None:
+        mock_notepad_title_field.delete = MagicMock()
+        mock_notepad_text_area.delete = MagicMock()
+        self.file_manager_cls.clear_notepad()
+        mock_notepad_title_field.delete.assert_called_once_with(0, 'end')
+        mock_notepad_text_area.delete.assert_called_once_with('1.0', 'end')
 
     @patch.object(FileManager, '_create_directory')
     @patch.object(FileManager, '_directory_exists', return_value=True)

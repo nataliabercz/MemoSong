@@ -72,8 +72,7 @@ class FileManager(GenericFunctions):
             self._remove_file(file_to_delete)
             self.update_list(self._current_browser_type)
             if self._current_browser_type == 'notes':
-                self.notepad_text_area.delete('1.0', tkinter.END)
-                self.notepad_title_field.delete(0, tkinter.END)
+                self.clear_notepad()
         else:
             msg.destroy()
 
@@ -82,6 +81,10 @@ class FileManager(GenericFunctions):
             os.remove(f'{self.app_path}/{self._current_browser_type}/{file_to_delete}')
         except FileNotFoundError:
             pass
+
+    def clear_notepad(self) -> None:
+        self.notepad_title_field.delete(0, tkinter.END)
+        self.notepad_text_area.delete('1.0', tkinter.END)
 
     def _get_full_filename(self, filename: str, browser_type: str, prefix: Optional[str] = '') -> str:
         if not self._directory_exists(browser_type):
