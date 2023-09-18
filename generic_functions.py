@@ -78,15 +78,15 @@ class GenericFunctions:
     def _start_new_thread(target: Any) -> None:
         threading.Thread(target=target).start()
 
-    def _highlight_used_function(self, button_name: str, option: str) -> None:
+    def _highlight_button(self, button_name: str, option: str) -> None:
         button = getattr(self, f'{button_name}_button')
         button.configure(border_width=1) if option == 'on' else button.configure(border_width=0)
 
-    def _highlight_button(self, key) -> None:
+    def _highlight_piano_key(self, key) -> None:
         button = self._get_button_from_key(key)
         button.configure(fg_color=['#325882', '#14375e'])
 
-    def _remove_button_highlight(self, key: str) -> None:
+    def _remove_piano_key_highlight(self, key: str) -> None:
         button = self._get_button_from_key(key)
         button.configure(fg_color='white') if self._is_white_key(key) else button.configure(fg_color='black')
 
