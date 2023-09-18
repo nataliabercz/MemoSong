@@ -55,7 +55,7 @@ class GenericFunctions:
     def _get_button_from_key(self, key: str) -> customtkinter.CTkButton:
         return getattr(self, f'{key}_key')
 
-    def _open_image(self, image_name: str, size=None) -> customtkinter.CTkImage:
+    def _open_image(self, image_name: str, size: Optional[Tuple[int, int]] = None) -> customtkinter.CTkImage:
         return customtkinter.CTkImage(Image.open(getattr(self, image_name)), size=size)
 
     def _load_image_names(self) -> None:
@@ -63,7 +63,7 @@ class GenericFunctions:
             if '.png' in image:
                 self._set_image_name(image.rsplit('.', 1)[0])
 
-    def _set_image_name(self, image_name) -> None:
+    def _set_image_name(self, image_name: str) -> None:
         setattr(self, f'{image_name}_image', f'{self.images_path}/{image_name}.png')
 
     @staticmethod
@@ -107,7 +107,7 @@ class GenericFunctions:
         os.mkdir(f'{self.app_path}/{browser_type}')
 
     @staticmethod
-    def _get_curselection_from_radiobutton_list(radiobutton_list: Any) -> str:
+    def _get_curselection_from_radiobutton_list(radiobutton_list: ScrollableRadiobuttonFrame) -> str:
         return radiobutton_list.get_selected_item()
 
     @staticmethod
