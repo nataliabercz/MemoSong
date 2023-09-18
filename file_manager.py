@@ -2,7 +2,7 @@ import os
 import datetime
 import tkinter
 import customtkinter
-from typing import Any, Optional
+from typing import List, Any, Optional
 from generic_functions import GenericFunctions
 from scrollable_radiobutton_frame import ScrollableRadiobuttonFrame
 
@@ -27,7 +27,7 @@ class FileManager(GenericFunctions):
         radiobutton_list = getattr(self, f'{browser_type}_radiobutton_list')
         radiobutton_list.clear_list()
         extension = self._get_extension(browser_type)
-        for file in os.listdir(f'{self.app_path}/{browser_type}'):
+        for file in self._list_files(f'{self.app_path}/{browser_type}'):
             if extension in file:
                 radiobutton_list.add_item(file)
 
@@ -36,7 +36,7 @@ class FileManager(GenericFunctions):
         if not self._directory_exists(browser_type):
             self._create_directory(browser_type)
         files = []
-        for file in os.listdir(f'{self.app_path}/{browser_type}'):
+        for file in self._list_files(f'{self.app_path}/{browser_type}'):
             if self._get_extension(browser_type) in file:
                 files.append(file)
         radiobutton_list = ScrollableRadiobuttonFrame(browser_frame, files, browser_type, command=command, width=1)
@@ -96,7 +96,7 @@ class FileManager(GenericFunctions):
         search_field = getattr(self, f'{browser_type}_search_field')
         radiobutton_list.clear_list()
         searched_item = search_field.get()
-        for file in os.listdir(f'{self.app_path}/{browser_type}'):
+        for file in self._list_files(f'{self.app_path}/{browser_type}'):
             if searched_item in file:
                 radiobutton_list.add_item(file)
 

@@ -5,7 +5,7 @@ import threading
 import customtkinter
 import CTkMessagebox
 from PIL import Image
-from typing import Tuple, Optional, Any
+from typing import Tuple, List, Optional, Any
 from scrollable_radiobutton_frame import ScrollableRadiobuttonFrame
 
 
@@ -59,7 +59,7 @@ class GenericFunctions:
         return customtkinter.CTkImage(Image.open(getattr(self, image_name)), size=size)
 
     def _load_image_names(self) -> None:
-        for image in os.listdir(f'{self.images_path}'):
+        for image in self._list_files(f'{self.images_path}'):
             if '.png' in image:
                 self._set_image_name(image.rsplit('.', 1)[0])
 
@@ -91,10 +91,17 @@ class GenericFunctions:
         button.configure(fg_color='white') if self._is_white_key(key) else button.configure(fg_color='black')
 
     def _filename_exists(self, browser_type: str, filename: str) -> bool:
-        return filename in os.listdir(f'{self.app_path}/{browser_type}')
+        return filename in self._list_files(f'{self.app_path}/{browser_type}')
 
     def _directory_exists(self, browser_type: str) -> bool:
-        return browser_type in os.listdir(self.app_path) and os.path.isdir(f'{self.app_path}/{browser_type}')
+        return browser_type in self._list_files(self.app_path) and os.path.isdir(f'{self.app_path}/{browser_type}')
+
+    def _list_files(self, directory) -> List[str]:
+        try:
+            print(directory)
+            return os.listdir(directory)
+        except (OSError, FileNotFoundError) as e:
+            self._display_message_box('ERROR', str(e).split('] ')[1].split(':')[0], False, 300)
 
     def _create_directory(self, browser_type: str) -> None:
         os.mkdir(f'{self.app_path}/{browser_type}')
