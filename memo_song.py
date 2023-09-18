@@ -142,7 +142,7 @@ class MemoSong(GenericFunctions):
         self._create_radiobutton_list(browser_frame, browser_type, command)
 
     def _create_radiobutton_list(self, browser_frame: customtkinter.CTkFrame, browser_type: str, command: Any) -> None:
-        radiobutton_list = self.file_manager.create_radiobutton_list(browser_frame, browser_type, command)
+        radiobutton_list = self.file_manager.create_and_get_radiobutton_list(browser_frame, browser_type, command)
         setattr(FileManager, f'{browser_type}_radiobutton_list', radiobutton_list)
 
     def configure_notepad(self) -> None:

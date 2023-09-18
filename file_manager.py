@@ -17,7 +17,7 @@ class FileManager(GenericFunctions):
     def edit_file(self, option: str) -> None:
         if self._current_browser_type:
             file_to_edit = self._get_curselection_from_radiobutton_list(
-                    getattr(self, f'{self._current_browser_type}_radiobutton_list'))
+                getattr(self, f'{self._current_browser_type}_radiobutton_list'))
             self._rename_file(file_to_edit) if option == 'rename' \
                 else self._delete_file(file_to_edit)
         else:
@@ -31,18 +31,23 @@ class FileManager(GenericFunctions):
             if extension in file:
                 radiobutton_list.add_item(file)
 
-    def create_radiobutton_list(self, browser_frame: customtkinter.CTkFrame,
-                                browser_type: str, command: Any) -> ScrollableRadiobuttonFrame:
+    def create_and_get_radiobutton_list(self, browser_frame: customtkinter.CTkFrame,
+                                        browser_type: str, command: Any) -> ScrollableRadiobuttonFrame:
         if not self._directory_exists(browser_type):
             self._create_directory(browser_type)
         files = []
         for file in self._list_files(f'{self.app_path}/{browser_type}'):
             if self._get_extension(browser_type) in file:
                 files.append(file)
-        radiobutton_list = ScrollableRadiobuttonFrame(browser_frame, files, browser_type, command=command, width=1)
+        radiobutton_list = self._create_radiobutton_list(browser_frame, files, browser_type, command=command)
         radiobutton_list.bind('<<ListboxSelect>>', command)
         radiobutton_list.pack(fill=tkinter.BOTH)
         return radiobutton_list
+
+    @staticmethod
+    def _create_radiobutton_list(browser_frame: customtkinter.CTkFrame, files: List['str'], browser_type: str,
+                                 command: Any) -> ScrollableRadiobuttonFrame:
+        return ScrollableRadiobuttonFrame(browser_frame, files, browser_type, command=command, width=1)
 
     def _rename_file(self, file_to_rename: str) -> None:
         try:

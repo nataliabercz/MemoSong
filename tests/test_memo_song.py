@@ -238,16 +238,16 @@ class TestMemoSong(unittest.TestCase):
                                                              self.memo_song_cls.recording_manager.play_recording)
         self.assertEqual(getattr(self.memo_song_cls.file_manager, 'recordings_search_field'), mock_tkinter_entry)
 
-    @patch('file_manager.FileManager.create_radiobutton_list', return_value='radiobutton_list')
-    def test_create_radiobutton_list_recordings(self, mock_create_radiobutton_list: MagicMock) -> None:
+    @patch('file_manager.FileManager.create_and_get_radiobutton_list', return_value='radiobutton_list')
+    def test_create_radiobutton_list_recordings(self, mock_create_and_get_radiobutton_list: MagicMock) -> None:
         self.memo_song_cls._create_radiobutton_list(mock_tkinter_frame, 'recordings', 'command')
-        mock_create_radiobutton_list.assert_called_once_with(mock_tkinter_frame, 'recordings', 'command')
+        mock_create_and_get_radiobutton_list.assert_called_once_with(mock_tkinter_frame, 'recordings', 'command')
         self.assertEqual(self.memo_song_cls.file_manager.recordings_radiobutton_list, 'radiobutton_list')
 
-    @patch('file_manager.FileManager.create_radiobutton_list', return_value='notes_list')
-    def test_create_radiobutton_list_notes(self, mock_create_radiobutton_list: MagicMock) -> None:
+    @patch('file_manager.FileManager.create_and_get_radiobutton_list', return_value='notes_list')
+    def test_create_radiobutton_list_notes(self, mock_create_and_get_radiobutton_list: MagicMock) -> None:
         self.memo_song_cls._create_radiobutton_list(mock_tkinter_frame, 'notes', 'command')
-        mock_create_radiobutton_list.assert_called_once_with(mock_tkinter_frame, 'notes', 'command')
+        mock_create_and_get_radiobutton_list.assert_called_once_with(mock_tkinter_frame, 'notes', 'command')
         self.assertEqual(self.memo_song_cls.file_manager.notes_radiobutton_list, 'notes_list')
 
     @patch.object(MemoSong, '_setup_notepad', return_value=mock_tkinter_textbox)
