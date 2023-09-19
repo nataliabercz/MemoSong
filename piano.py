@@ -13,4 +13,4 @@ class Piano(GenericFunctions):
         pygame.mixer.Sound.play(pygame.mixer.Sound(f'{self.keys_path}/{self.key_map[key]}.wav'))
         self.recording_manager.update_piano_recorder_key(key)
         time.sleep(0.1)
-        self._remove_button_highlight(key)
+        self._remove_piano_key_highlight(key)
