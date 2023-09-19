@@ -4,10 +4,9 @@ from piano_recorder import PianoRecorder
 from test_memo_song_data import *
 
 
-class TestMemoSong(unittest.TestCase):
+class TestPianoRecorder(unittest.TestCase):
     def setUp(self) -> None:
         self.piano_recorder_cls = PianoRecorder()
-        self.piano_recorder_cls._sound = mock_sound
 
     @patch.object(PianoRecorder, '_save_recording')
     @patch.object(PianoRecorder, '_loop_recording')
@@ -105,5 +104,5 @@ class TestMemoSong(unittest.TestCase):
         self.assertEqual(self.piano_recorder_cls._paused_time, 10.0)
 
     def test_save_recording(self) -> None:
-        self.piano_recorder_cls._save_recording(mock_sound)
-        mock_sound.export.assert_called_once_with(self.piano_recorder_cls.recording_full_name, format='wav')
+        self.piano_recorder_cls._save_recording(mock_pydub_sound)
+        mock_pydub_sound.export.assert_called_once_with(self.piano_recorder_cls.recording_full_name, format='wav')

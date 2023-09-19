@@ -67,18 +67,29 @@ class TestFileManager(unittest.TestCase):
         mock_delete_file.assert_not_called()
         mock_display_message_box.assert_called_once_with('ERROR', 'Please, select a file to delete', False, 300)
 
-    # @patch('scrollable_radiobutton_frame.ScrollableRadiobuttonFrame.add_item')
-    # @patch('os.listdir')
-    # @patch.object(FileManager, '_get_extension')
-    # @patch.object(FileManager.recordings_radiobutton_list, 'clear_list')
-    # def test_update_list(self, _,_2, _3, _4) -> None:
-    #     mock_recordings_radiobutton_list = MagicMock(0)
-    #     self.file_manager_cls.recordings_radiobutton_list = MagicMock(return_value=mock_recordings_radiobutton_list)
-    #     self.file_manager_cls.update_list('recordings')
-    #     _.assert_called_once_with()
-    #     _2.assert_called_once_with()
-    #     _3.assert_called_once_with()
-    #     _4.assert_called_once_with()
+    @patch.object(FileManager, '_list_files', return_value=['file.wav', 'file.txt'])
+    @patch.object(FileManager, '_get_extension', return_value='wav')
+    def test_update_list(self, mock_get_extension: MagicMock, mock_list_files: MagicMock) -> None:
+        self.file_manager_cls.recordings_radiobutton_list = MagicMock()
+        self.file_manager_cls.recordings_radiobutton_list.clear_list = MagicMock()
+        self.file_manager_cls.recordings_radiobutton_list.add_item = MagicMock()
+        self.file_manager_cls.update_list('recordings')
+        self.file_manager_cls.recordings_radiobutton_list.clear_list.assert_called_once_with()
+        mock_get_extension.assert_called_once_with('recordings')
+        mock_list_files.assert_called_once_with(f'{self.file_manager_cls.app_path}/recordings')
+        self.file_manager_cls.recordings_radiobutton_list.add_item.assert_called_once_with('file.wav')
+
+    @patch.object(FileManager, '_list_files', return_value=[])
+    @patch.object(FileManager, '_get_extension', return_value='txt')
+    def test_update_list_empty(self, mock_get_extension: MagicMock, mock_list_files: MagicMock) -> None:
+        self.file_manager_cls.notes_radiobutton_list = MagicMock()
+        self.file_manager_cls.notes_radiobutton_list.clear_list = MagicMock()
+        self.file_manager_cls.notes_radiobutton_list.add_item = MagicMock()
+        self.file_manager_cls.update_list('notes')
+        self.file_manager_cls.notes_radiobutton_list.clear_list.assert_called_once_with()
+        mock_get_extension.assert_called_once_with('notes')
+        mock_list_files.assert_called_once_with(f'{self.file_manager_cls.app_path}/notes')
+        self.file_manager_cls.notes_radiobutton_list.add_item.assert_not_called()
 
     def test_create_radiobutton_list(self) -> None:
         pass
@@ -200,27 +211,6 @@ class TestFileManager(unittest.TestCase):
         mock_update_list.assert_not_called()
         mock_clear_notepad.assert_not_called()
         mock_tkinter_messagebox.destroy.assert_called_once_with()
-        # mock_remove_file.assert_called_once_with()
-        # mock_update_list.assert_called_once_with()
-        # mock_tkinter_textbox.delete.assert_called_once_with()
-        # mock_tkinter_entry.delete.assert_called_once_with()
-        # msg = self._display_message_box('DELETE FILE', f'Do you want to delete\n{file_to_delete}?', True)
-        # if msg.get() == 'Yes':
-        #     if self._current_browser_type == 'recordings':
-        #         self._mute_playback()
-        #     self._remove_file(file_to_delete)
-        #     self.update_list(self._current_browser_type)
-        #     if self._current_browser_type == 'notes':
-        #         self.notepad_text_area.delete('1.0', tkinter.END)
-        #         self.notepad_title_field.delete(0, tkinter.END)
-        # else:
-        #     msg.destroy()
-
-    def test_delete_file_note(self) -> None:
-        pass
-
-    def test_delete_file_canceled(self) -> None:
-        pass
 
     @patch('os.remove')
     def test_remove_file(self, mock_os_remove: MagicMock) -> None:
@@ -301,14 +291,41 @@ class TestFileManager(unittest.TestCase):
         self.file_manager_cls.search_notes()
         mock_search.assert_called_once_with('notes')
 
-    # def test_search(self) -> None:
-    #     radiobutton_list = getattr(self, f'{browser_type}_radiobutton_list')
-    #     search_field = getattr(self, f'{browser_type}_search_field')
-    #     radiobutton_list.clear_list()
-    #     searched_item = search_field.get()
-    #     for file in os.listdir(f'{self.app_path}/{browser_type}'):
-    #         if searched_item in file:
-    #             radiobutton_list.add_item(file)
+    @patch.object(FileManager, '_list_files', return_value=['file1', 'file2'])
+    @patch.object(FileManager, 'recordings_radiobutton_list', return_value=not_empty_radiobutton_list)
+    def test_search_whole_name(self, mock_recordings_radiobutton_list: MagicMock, mock_list_files: MagicMock) -> None:
+        mock_recordings_radiobutton_list.clear_list = MagicMock()
+        self.file_manager_cls.recordings_search_field = MagicMock()
+        self.file_manager_cls.recordings_search_field.get = MagicMock(return_value='file1')
+        self.file_manager_cls._search('recordings')
+        mock_recordings_radiobutton_list.clear_list.assert_called_once_with()
+        self.file_manager_cls.recordings_search_field.get.assert_called_once_with()
+        mock_list_files.assert_called_once_with(f'{self.file_manager_cls.app_path}/recordings')
+        mock_recordings_radiobutton_list.add_item.assert_called_once_with('file1')
+
+    @patch.object(FileManager, '_list_files', return_value=['file1', 'file2', 'some_recording'])
+    @patch.object(FileManager, 'recordings_radiobutton_list', return_value=not_empty_radiobutton_list)
+    def test_search_regex(self, mock_recordings_radiobutton_list: MagicMock, mock_list_files: MagicMock) -> None:
+        mock_recordings_radiobutton_list.clear_list = MagicMock()
+        self.file_manager_cls.recordings_search_field = MagicMock()
+        self.file_manager_cls.recordings_search_field.get = MagicMock(return_value='l')
+        self.file_manager_cls._search('recordings')
+        mock_recordings_radiobutton_list.clear_list.assert_called_once_with()
+        self.file_manager_cls.recordings_search_field.get.assert_called_once_with()
+        mock_list_files.assert_called_once_with(f'{self.file_manager_cls.app_path}/recordings')
+        mock_recordings_radiobutton_list.add_item.assert_has_calls([call('file1'), call('file2')])
+
+    @patch.object(FileManager, '_list_files', return_value=['file1', 'file2'])
+    @patch.object(FileManager, 'recordings_radiobutton_list', return_value=not_empty_radiobutton_list)
+    def test_search_not_found(self, mock_recordings_radiobutton_list: MagicMock, mock_list_files: MagicMock) -> None:
+        mock_recordings_radiobutton_list.clear_list = MagicMock()
+        self.file_manager_cls.recordings_search_field = MagicMock()
+        self.file_manager_cls.recordings_search_field.get = MagicMock(return_value='file3')
+        self.file_manager_cls._search('recordings')
+        mock_recordings_radiobutton_list.clear_list.assert_called_once_with()
+        self.file_manager_cls.recordings_search_field.get.assert_called_once_with()
+        mock_list_files.assert_called_once_with(f'{self.file_manager_cls.app_path}/recordings')
+        mock_recordings_radiobutton_list.add_item.assert_not_called()
 
     def test_get_extension_recordings(self) -> None:
         extension = self.file_manager_cls._get_extension('recordings')

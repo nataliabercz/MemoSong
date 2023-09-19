@@ -5,6 +5,7 @@ import pyaudio
 import tkinter
 import customtkinter
 import CTkMessagebox
+import scrollable_radiobutton_frame
 
 mock_tkinter_frame = MagicMock()
 customtkinter.CTkFrame = MagicMock(return_value=mock_tkinter_frame)
@@ -18,10 +19,9 @@ scrollable_radiobutton_frame.ScrollableRadiobuttonFrame = MagicMock(return_value
 
 mock_tkinter_entry = MagicMock()
 customtkinter.CTkEntry = MagicMock(return_value=mock_tkinter_entry)
-mock_tkinter_image = MagicMock()
-customtkinter.CTkImage = MagicMock(return_value=mock_tkinter_image)
 mock_tkinter_textbox = MagicMock()
 customtkinter.CTkTextbox = MagicMock(return_value=mock_tkinter_textbox)
+
 mock_tkinter_input_dialog = MagicMock()
 customtkinter.CTkInputDialog = MagicMock(return_value=mock_tkinter_input_dialog)
 mock_tkinter_messagebox = MagicMock()
@@ -32,15 +32,18 @@ mock_tkinter_radiobutton_2 = MagicMock()
 customtkinter.CTkRadioButton = MagicMock(side_effect=[mock_tkinter_radiobutton_1, mock_tkinter_radiobutton_2])
 not_empty_radiobutton_list = [mock_tkinter_radiobutton_1, mock_tkinter_radiobutton_2]
 
-mock_event = MagicMock()
-tkinter.Event = MagicMock(return_value=mock_event)
+mock_tkinter_image = MagicMock()
+customtkinter.CTkImage = MagicMock(return_value=mock_tkinter_image)
 
-mock_pyaudio = MagicMock()
-pyaudio.PyAudio = MagicMock(return_value=mock_pyaudio)
-mock_stream = mock_pyaudio.open
+mock_tkinter_event = MagicMock()
+tkinter.Event = MagicMock(return_value=mock_tkinter_event)
 
-mock_sound = MagicMock()
-pydub.AudioSegment = MagicMock(return_value=mock_sound)
+mock_pyaudio_audio = MagicMock()
+pyaudio.PyAudio = MagicMock(return_value=mock_pyaudio_audio)
+mock_pyaudio_stream = mock_pyaudio_audio.open
+
+mock_pydub_sound = MagicMock()
+pydub.AudioSegment = MagicMock(return_value=mock_pydub_sound)
 
 is_white_key = 3 * [True, False, True, False, True, True, False, True, False, True, False, True] + [True]
 
