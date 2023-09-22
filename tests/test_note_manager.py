@@ -224,7 +224,7 @@ class TestNoteManager(unittest.TestCase):
         file = io.StringIO('')
         file.write = MagicMock()
         file.close = MagicMock()
-        with patch("builtins.open", return_value=file, create=True) as mock_open:
+        with patch('builtins.open', return_value=file, create=True) as mock_open:
             mock_notepad_text_area.get = MagicMock()
             self.note_manager_cls._save_note('note.txt')
             mock_open.assert_called_once_with(f'{self.note_manager_cls.app_path}/notes/note.txt', 'w')

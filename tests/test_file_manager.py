@@ -91,8 +91,25 @@ class TestFileManager(unittest.TestCase):
         mock_list_files.assert_called_once_with(f'{self.file_manager_cls.app_path}/notes')
         self.file_manager_cls.notes_radiobutton_list.add_item.assert_not_called()
 
-    def test_create_radiobutton_list(self) -> None:
-        pass
+    @patch.object(FileManager, '_create_radiobutton_list', return_value=mock_scrollable_radiobutton_frame)
+    @patch.object(FileManager, '_get_extension', return_value='wav')
+    @patch.object(FileManager, '_list_files', return_value=['file1.wav', 'file2.wav'])
+    @patch.object(FileManager, '_create_directory')
+    @patch.object(FileManager, '_directory_exists', return_value=True)
+    def test_create_and_get_radiobutton_list(self, mock_directory_exists: MagicMock, mock_create_directory: MagicMock,
+                                             mock_list_files: MagicMock, mock_get_extension: MagicMock,
+                                             mock_create_radiobutton_list: MagicMock) -> None:
+        radiobutton_list = self.file_manager_cls.create_and_get_radiobutton_list(mock_tkinter_frame, 'recordings',
+                                                                                 'command')
+        mock_directory_exists.assert_called_once_with('recordings')
+        mock_create_directory.assert_not_called()
+        mock_list_files.assert_called_once_with(f'{self.file_manager_cls.app_path}/recordings')
+        mock_get_extension.assert_has_calls([call('recordings'), call('recordings')])
+        mock_create_radiobutton_list.assert_called_once_with(mock_tkinter_frame, ['file1.wav', 'file2.wav'],
+                                                             'recordings', command='command')
+        mock_scrollable_radiobutton_frame.bind.assert_called_once_with('<<ListboxSelect>>', 'command')
+        mock_scrollable_radiobutton_frame.pack.assert_called_once_with(fill='both')
+        self.assertEqual(radiobutton_list, mock_scrollable_radiobutton_frame)
 
     @patch.object(FileManager, '_display_message_box')
     @patch.object(FileManager, 'notepad_title_field', side_effect=mock_tkinter_entry)
