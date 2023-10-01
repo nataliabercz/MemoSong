@@ -5,7 +5,8 @@ import pyaudio
 import tkinter
 import customtkinter
 import CTkMessagebox
-import scrollable_radiobutton_frame
+
+mock_scrollable_radiobutton_frame = MagicMock()
 
 mock_tkinter_frame = MagicMock()
 customtkinter.CTkFrame = MagicMock(return_value=mock_tkinter_frame)
@@ -13,9 +14,6 @@ mock_tkinter_label = MagicMock()
 customtkinter.CTkLabel = MagicMock(return_value=mock_tkinter_label)
 mock_tkinter_button = MagicMock()
 customtkinter.CTkButton = MagicMock(return_value=mock_tkinter_button)
-
-mock_scrollable_radiobutton_frame = MagicMock()
-scrollable_radiobutton_frame.ScrollableRadiobuttonFrame = MagicMock(return_value=mock_scrollable_radiobutton_frame)
 
 mock_tkinter_entry = MagicMock()
 customtkinter.CTkEntry = MagicMock(return_value=mock_tkinter_entry)
@@ -154,10 +152,6 @@ calls_pydub_from_wav = [
     call(f'{keys_path}/c6.wav')
 ]
 
-os_error = '[WinError 123] The filename, directory name, or volume label syntax is incorrect: {} -> {}'
-incorrect_file_error = 'The filename, directory name, or volume label syntax is incorrect'
-file_not_found_error = '[WinError 2] The system cannot find the file specified: {}/recordings/not_existent'
-
 stream_read_data = b'\xef\xff\xee\xff\xee\xff\xec\xff\xea\xff\xe9\xff\xe9\xff\xe9\xff\xed\xff\xed\xff\xee\xff\xee\xff' \
                    b'\xed\xff\xeb\xff\xeb\xff\xeb\xff\xeb\xff\xed\xff\xee\xff\xee\xff\xef\xff\xef\xff\xee\xff\xed\xff' \
                    b'\xec\xff\xeb\xff\xeb\xff\xeb\xff\xed\xff\xee\xff\xee\xff\xee\xff\xef\xff\xef\xff\xee\xff\xef\xff' \
@@ -170,3 +164,10 @@ stream_read_data = b'\xef\xff\xee\xff\xee\xff\xec\xff\xea\xff\xe9\xff\xe9\xff\xe
                    b'\xef\xff\xed\xff\xef\xff\xee\xff\xef\xff\xf0\xff\xf1\xff\xf0\xff\xef\xff\xef\xff\xef\xff\xf0\xff' \
                    b'\xf0\xff\xf0\xff\xf0\xff\xef\xff\xf0\xff\xf0\xff\xef\xff\xef\xff\xf0\xff\xf0\xff\xf1\xff\xf0\xff' \
                    b'\xf0\xff\xf1\xff\xf0\xff\xf1\xff\xf0\xff\xf0\xff\xf0\xff\xf0\xff\xf0\xff\xf0\xff\xf1\xff\xef\xff'
+
+win_error_123 = '[WinError 123] '
+os_error_msg = 'The filename, directory name, or volume label syntax is incorrect'
+os_error_list = win_error_123 + os_error_msg + ': {}'
+os_error_rename = win_error_123 + os_error_msg + ': {} -> {}'
+file_not_found_error_msg = 'The system cannot find the file specified'
+file_not_found_error_list = '[WinError 2] ' + file_not_found_error_msg + ': {}'

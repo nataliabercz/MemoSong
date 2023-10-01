@@ -98,7 +98,6 @@ class GenericFunctions:
 
     def _list_files(self, directory) -> List[str]:
         try:
-            print(directory)
             return os.listdir(directory)
         except (OSError, FileNotFoundError) as e:
             self._display_message_box('ERROR', str(e).split('] ')[1].split(':')[0], False, 300)

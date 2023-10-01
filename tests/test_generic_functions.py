@@ -179,20 +179,19 @@ class TestGenericFunctions(unittest.TestCase):
         self.assertEqual(files, [])
 
     @patch.object(GenericFunctions, '_display_message_box')
-    @patch.object(GenericFunctions, '_list_files', side_effect=OSError(os_error.format(
-        f'{GenericFunctions.app_path}/recordings/???', '')))
-    def test_list_files_error_1(self, mock_list_files: MagicMock, mock_display_message_box: MagicMock) -> None:
+    @patch('os.listdir', side_effect=OSError(os_error_list.format('???')))
+    def test_list_files_os_error(self, mock_list_files: MagicMock, mock_display_message_box: MagicMock) -> None:
         self.generic_functions_cls._list_files('???')
         mock_list_files.assert_called_once_with('???')
-        mock_display_message_box.assert_called_once_with('ERROR', os_error_text, False, 300)
+        mock_display_message_box.assert_called_once_with('ERROR', os_error_msg, False, 300)
 
     @patch.object(GenericFunctions, '_display_message_box')
-    @patch.object(GenericFunctions, '_list_files', side_effect=FileNotFoundError(
-        file_not_found_error.format(f'{GenericFunctions.app_path}')))
+    @patch('os.listdir', side_effect=FileNotFoundError(
+        file_not_found_error_list.format(f'{GenericFunctions.app_path}/recordings/not_existent')))
     def test_list_files_error_2(self, mock_list_files: MagicMock, mock_display_message_box: MagicMock) -> None:
         self.generic_functions_cls._list_files('not_existent')
         mock_list_files.assert_called_once_with('not_existent')
-        mock_display_message_box.assert_called_once_with('ERROR', file_not_found_text, False, 300)
+        mock_display_message_box.assert_called_once_with('ERROR', file_not_found_error_msg, False, 300)
 
     @patch('os.mkdir')
     def test_create_directory(self, mock_mkdir: MagicMock()) -> None:
