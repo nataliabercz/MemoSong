@@ -155,8 +155,8 @@ class TestFileManager(unittest.TestCase):
     @patch.object(FileManager, '_display_message_box')
     @patch.object(FileManager, 'notepad_title_field', side_effect=mock_tkinter_entry)
     @patch.object(FileManager, 'update_list')
-    @patch('os.rename', side_effect=OSError(os_error.format(f'{FileManager.app_path}/recordings/file',
-                                                            f'{FileManager.app_path}/recordings/???')))
+    @patch('os.rename', side_effect=OSError(os_error_rename.format(f'{FileManager.app_path}/recordings/file',
+                                                                   f'{FileManager.app_path}/recordings/???')))
     @patch.object(FileManager, '_mute_playback')
     def test_rename_file_os_error(self, mock_mute_playback: MagicMock, mock_os_rename: MagicMock,
                                   mock_update_list: MagicMock, mock_notepad_title_field: MagicMock,
@@ -171,7 +171,7 @@ class TestFileManager(unittest.TestCase):
         mock_update_list.assert_not_called()
         mock_notepad_title_field.delete.assert_not_called()
         mock_notepad_title_field.insert.assert_not_called()
-        mock_display_message_box.assert_called_once_with('ERROR', incorrect_file_error, False, 300)
+        mock_display_message_box.assert_called_once_with('ERROR', os_error_msg, False, 300)
 
     @patch.object(FileManager, 'clear_notepad')
     @patch.object(FileManager, 'update_list')
@@ -235,7 +235,7 @@ class TestFileManager(unittest.TestCase):
         self.file_manager_cls._remove_file('file')
         mock_os_remove.assert_called_once_with(f'{self.file_manager_cls.app_path}/recordings/file')
 
-    @patch('os.remove', side_effect=file_not_found_error.format(f'{FileManager.app_path}/recordings/not_existent'))
+    @patch('os.remove', side_effect=file_not_found_error_list.format(f'{FileManager.app_path}/recordings/not_existent'))
     def test_remove_file_not_existent(self, mock_os_remove: MagicMock) -> None:
         self.file_manager_cls._current_browser_type = 'recordings'
         self.file_manager_cls._remove_file('not_existent')
