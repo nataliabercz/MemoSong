@@ -1,3 +1,4 @@
+import sys
 import tkinter
 import customtkinter
 from typing import Dict, Any, Optional
@@ -24,7 +25,7 @@ class MemoSong(GenericFunctions):
         self.root.mainloop()
 
     def quit_application(self) -> None:
-        self.root.destroy()
+        self.root.quit()
 
     def prepare_layout(self) -> None:
         self._load_image_names()

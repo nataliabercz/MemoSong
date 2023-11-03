@@ -12,7 +12,7 @@ class TestMemoSong(unittest.TestCase):
 
     def tearDown(self) -> None:
         if self.root:
-            self.root.destroy()
+            self.root.quit()
 
     @patch.object(MemoSong, 'prepare_layout')
     @patch.object(MemoSong, '_set_theme')
@@ -24,7 +24,7 @@ class TestMemoSong(unittest.TestCase):
 
     def test_quit_application(self) -> None:
         self.memo_song_cls.quit_application()
-        self.memo_song_cls.root.destroy.assert_called_once_with()
+        self.memo_song_cls.root.quit.assert_called_once_with()
 
     @patch.object(MemoSong, '_initialize_sound_mixer')
     @patch.object(MemoSong, 'configure_piano')

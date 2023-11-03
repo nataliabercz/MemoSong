@@ -95,9 +95,9 @@ calls_configure_piano = [
 ]
 
 calls_load_image_names = [
-    call('idle'), call('keyboard'), call('logo'), call('mute'), call('pause_piano_recording'),
-    call('pause_voice_recording'), call('playing'), call('start_piano_recording'), call('start_voice_recording'),
-    call('stop_piano_recording'), call('stop_voice_recording')
+    call('keyboard'), call('logo'), call('mute'), call('pause_piano_recording'), call('pause_voice_recording'),
+    call('start_piano_recording'), call('start_voice_recording'), call('stop_piano_recording'),
+    call('stop_voice_recording')
 ]
 
 calls_add_keyboard_text = [
