@@ -100,7 +100,7 @@ class RecordingManager(FileManager):
         self._modify_buttons_highlight(recording_type, 'off')
         recorder.recording = False
         self._modify_title_field(recording_type)
-        self.recordings_radiobutton_list.add_item(self._get_recording_title(recording_type))
+        self.recordings_radiobutton_list.add_item(getattr(self, f'{recording_type}_recording_title'))
 
     def _modify_title_field(self, recording_type: str) -> None:
         title_field = self._get_title_field(recording_type)
