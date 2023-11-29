@@ -10,6 +10,8 @@ The melody can be hummed using the Voice Recorder or played directly on the Pian
 It is possible to use keyboard for that. 
 The included File Browsers make it easy to review the created music pieces.
 
+Watch the short video and see how it works :) https://youtu.be/_UMkVsnawDc.
+
 ![](app_description/app.png)
 
 ## Requirements
